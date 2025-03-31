@@ -1,8 +1,11 @@
 package com.example.diplomproject
 
+import android.content.Context
+import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
@@ -12,6 +15,7 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.with
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -21,6 +25,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -36,6 +41,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.SegmentedButtonDefaults.Icon
@@ -52,10 +58,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -71,6 +81,7 @@ import kotlinx.coroutines.launch
 fun SurveyScreen(navController: NavController) {
     var testStarted by remember { mutableStateOf(false) }
     var testResult by remember { mutableStateOf<String?>(null) }
+    var stressLvl by remember { mutableStateOf<Float>(0f) }
     var stressImageRes by remember { mutableStateOf<Int?>(null) }
 
     Box(
@@ -102,17 +113,16 @@ fun SurveyScreen(navController: NavController) {
 
             if (testStarted) {
                 StressTestScreen(
-                    onFinish = { result ->
+                    onFinish = { result, stressLevel ->
                         testStarted = false
+                        stressLvl = stressLevel
                         testResult = result
 
-                        stressImageRes = when (result) {
-                            "Очень низкий уровень стресса" -> R.drawable.emoji
-                            "Низкий уровень стресса" -> R.drawable.emoji
-                            "Средний уровень стресса" -> R.drawable.emoji
-                            "Высокий уровень стресса" -> R.drawable.emoji
-                            "Очень высокий уровень стресса" -> R.drawable.emoji
-                            else -> null
+                        stressImageRes = when {
+                            stressLevel <= 2 -> R.drawable.emoji
+                            stressLevel <= 4 -> R.drawable.emoji
+                            stressLevel <= 7 -> R.drawable.emoji
+                            else -> R.drawable.emoji
                         }
                     }
                 )
@@ -171,7 +181,7 @@ fun SurveyScreen(navController: NavController) {
     }
 
     testResult?.let { result ->
-        ResultDialog(resultText = result, stressImageRes = stressImageRes) {
+        ResultDialog(resultText = result, stressImageRes = stressImageRes, stressLevel = stressLvl) {
             testResult = null
             stressImageRes = null
         }
@@ -179,13 +189,49 @@ fun SurveyScreen(navController: NavController) {
 }
 
 @Composable
-fun ResultDialog(resultText: String, stressImageRes: Int?, onDismiss: () -> Unit) {
+fun CircularStressIndicator(stressLevel: Float) {
+    val progress by animateFloatAsState(
+        targetValue = stressLevel / 10f,
+        animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing)
+    )
+
+    val color = when {
+        stressLevel < 3 -> Color(0xFF76D7B2) // Зеленый
+        stressLevel < 6 -> Color(0xFFF4D03F) // Желтый
+        else -> Color(0xFFFF5733) // Красный
+    }
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier.size(150.dp)
+    ) {
+        Canvas(modifier = Modifier.size(150.dp)) {
+            drawCircle(color.copy(alpha = 0.2f), radius = size.minDimension / 2)
+        }
+
+        CircularProgressIndicator(
+            progress = progress,
+            strokeWidth = 12.dp,
+            color = color,
+            modifier = Modifier.size(130.dp)
+        )
+
+        Text(
+            text = "${(stressLevel * 10).toInt()}%",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            color = color
+        )
+    }
+}
+
+@Composable
+fun ResultDialog(resultText: String, stressImageRes: Int?, stressLevel: Float, onDismiss: () -> Unit) {
     var isVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(stressImageRes) {
         isVisible = true
     }
-
     AnimatedVisibility(
         visible = isVisible,
         enter = fadeIn(animationSpec = tween(durationMillis = 500)) + expandVertically(),
@@ -193,14 +239,14 @@ fun ResultDialog(resultText: String, stressImageRes: Int?, onDismiss: () -> Unit
     ) {
         AlertDialog(
             onDismissRequest = onDismiss,
-            containerColor = Color(0xFFed9a66),
+            containerColor = Color(0xFFffece0),
             shape = RoundedCornerShape(16.dp),
             title = {
                 Text(
                     text = "Результат теста",
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White,
+                    color = Color(0xFF2A3439),
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -216,14 +262,23 @@ fun ResultDialog(resultText: String, stressImageRes: Int?, onDismiss: () -> Unit
                                 .padding(bottom = 16.dp)
                         )
                     }
-
                     Text(
                         text = resultText,
                         fontSize = 18.sp,
-                        color = Color.White,
+                        color = Color(0xFF2A3439),
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth().padding(8.dp)
                     )
+                    Text(
+                        text = "Уровень стресса: ${"%.1f".format(stressLevel)}",
+                        fontSize = 18.sp,
+                        color = Color(0xFF2A3439),
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(top = 16.dp)
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    // Шкала стресса
+                    CircularStressIndicator(stressLevel = stressLevel)
                 }
             },
             confirmButton = {
@@ -234,14 +289,17 @@ fun ResultDialog(resultText: String, stressImageRes: Int?, onDismiss: () -> Unit
                     contentAlignment = Alignment.Center
                 ) {
                     Button(
+                        modifier = Modifier
+                            .border(2.dp, Color(0xFF2A3439), RoundedCornerShape(8.dp))
+                            .width(100.dp),
                         onClick = onDismiss,
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.White)
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFffece0))
                     ) {
                         Text(
                             text = "ОК",
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFFed9a66)
+                            color = Color(0xFF2A3439)
                         )
                     }
                 }
@@ -250,6 +308,7 @@ fun ResultDialog(resultText: String, stressImageRes: Int?, onDismiss: () -> Unit
     }
 }
 
+
 @Composable
 fun SurveyCard(title: String, iconRes: Int, onClick: () -> Unit) {
     Card(
@@ -257,11 +316,10 @@ fun SurveyCard(title: String, iconRes: Int, onClick: () -> Unit) {
             .fillMaxWidth()
             .padding(vertical = 16.dp)
             .clickable { onClick() }
-            .shadow(10.dp)
-            .border(2.dp, Color.White, RoundedCornerShape(12.dp)),
+            .shadow(10.dp),
         elevation = CardDefaults.cardElevation(6.dp),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF2A3439))
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF4E756E))
     ) {
         Row(
             modifier = Modifier
@@ -290,21 +348,23 @@ fun SurveyCard(title: String, iconRes: Int, onClick: () -> Unit) {
 @Preview(showBackground = true)
 @Composable
 fun ResultDialogPreview() {
-    ResultDialog(resultText = "Ваш уровень стресса: Средний",R.drawable.emoji) {
-    }
+
 }
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun StressTestScreen(onFinish: (String) -> Unit) {
+fun StressTestScreen(onFinish: (String, Float) -> Unit) {
     var questionIndex by remember { mutableStateOf(0) }
-    val questions = getStressTestQuestions()
+    val context = LocalContext.current
+    val questions = remember { getRandomQuestions(context) }
     val textColor = Color(0xFF2A3439)
     val primaryColor = Color(0xFFed9a66)
     val scores = listOf(0, 1, 2, 3, 4)
 
     var userScores by remember { mutableStateOf(List(questions.size) { 0 }) }
     var resultText by remember { mutableStateOf("") }
+    var stressLevel by remember { mutableStateOf(0f) }
+    var totalScore by remember { mutableStateOf(0) }
 
     val coroutineScope = rememberCoroutineScope()
 
@@ -369,7 +429,6 @@ fun StressTestScreen(onFinish: (String) -> Unit) {
             }
 
             Spacer(modifier = Modifier.height(25.dp))
-
             questions[questionIndex].second.forEachIndexed { index, answer ->
                 var isClicked by remember { mutableStateOf(false) }
                 val scale by animateFloatAsState(
@@ -383,39 +442,42 @@ fun StressTestScreen(onFinish: (String) -> Unit) {
                         .fillMaxWidth()
                         .padding(vertical = 8.dp)
                         .height(70.dp)
-                        .border(2.dp, textColor, RoundedCornerShape(12.dp))
                         .graphicsLayer(scaleX = scale, scaleY = scale)
                         .clickable {
                             isClicked = true
-                            userScores = userScores.toMutableList().also { it[questionIndex] = scores[index] }
+                            val updatedScores = userScores.toMutableList()
+                            updatedScores[questionIndex] = scores[index]
+                            userScores = updatedScores
+                            totalScore += scores[index]
 
                             coroutineScope.launch {
                                 delay(150)
                                 isClicked = false
-
+                                Log.d("StressTest", "Answer selected: ${scores[index]} for question ${questionIndex + 1}")
                                 if (questionIndex < questions.size - 1) {
                                     questionIndex++
                                 } else {
-                                    val totalScore = userScores.sum()
+                                    stressLevel = (totalScore.toFloat() / (questions.size * 4)) * 10f
                                     resultText = when {
-                                        totalScore <= 15 -> "Очень низкий уровень стресса"
-                                        totalScore <= 30 -> "Низкий уровень стресса"
-                                        totalScore <= 45 -> "Средний уровень стресса"
-                                        totalScore <= 60 -> "Высокий уровень стресса"
+                                        totalScore <= 16 -> "Очень низкий уровень стресса"
+                                        totalScore <= 26 -> "Низкий уровень стресса"
+                                        totalScore <= 34 -> "Средний уровень стресса"
+                                        totalScore <= 48 -> "Высокий уровень стресса"
                                         else -> "Очень высокий уровень стресса"
                                     }
-                                    onFinish(resultText)
+                                    onFinish(resultText, stressLevel)
+                                    totalScore = 0
                                 }
                             }
                         },
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF4E756E)),
                     elevation = CardDefaults.cardElevation(2.dp)
                 ) {
                     Text(
                         text = answer,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = textColor,
+                        color = Color.White,
                         modifier = Modifier
                             .fillMaxSize()
                             .wrapContentSize(Alignment.Center)
@@ -423,39 +485,34 @@ fun StressTestScreen(onFinish: (String) -> Unit) {
                     )
                 }
             }
+
+            if (questionIndex == questions.size) {
+                Spacer(modifier = Modifier.height(40.dp))
+                Text(
+                    text = "Уровень стресса: ${stressLevel.toInt()} / 10",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = primaryColor
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+            }
         }
     }
 }
 
-
-fun getStressTestQuestions(): List<Pair<String, List<String>>> {
-    return listOf(
-        "Как часто за последний месяц вы чувствовали себя расстроенным из-за чего-то неожиданного?" to listOf("Никогда", "Редко", "Иногда", "Часто", "Очень часто"),
-        "Как часто за последний месяц вы ощущали, что не можете справиться с важными делами?" to listOf("Никогда", "Редко", "Иногда", "Часто", "Очень часто"),
-        "Как часто за последний месяц вы чувствовали нервозность и стресс?" to listOf("Никогда", "Редко", "Иногда", "Часто", "Очень часто"),
-        "Как часто за последний месяц вы чувствовали уверенность в своей способности контролировать важные вещи?" to listOf("Никогда", "Редко", "Иногда", "Часто", "Очень часто"),
-        "Как часто за последний месяц вы ощущали, что все идет не так, как вам хотелось бы?" to listOf("Никогда", "Редко", "Иногда", "Часто", "Очень часто"),
-        "Как часто за последний месяц вы чувствовали, что не можете контролировать важные события в своей жизни?" to listOf("Никогда", "Редко", "Иногда", "Часто", "Очень часто"),
-        "Как часто за последний месяц вы чувствовали, что вас раздражает что-то, что не поддается вашему контролю?" to listOf("Никогда", "Редко", "Иногда", "Часто", "Очень часто"),
-        "Как часто за последний месяц вы чувствовали, что вам не хватает энергии для выполнения повседневных задач?" to listOf("Никогда", "Редко", "Иногда", "Часто", "Очень часто"),
-        "Как часто за последний месяц вы чувствовали, что вам трудно справляться с возникающими проблемами?" to listOf("Никогда", "Редко", "Иногда", "Часто", "Очень часто"),
-        "Как часто за последний месяц вы испытывали чувство тревоги?" to listOf("Никогда", "Редко", "Иногда", "Часто", "Очень часто"),
-        "Как часто за последний месяц вы ощущали, что не успеваете сделать все, что запланировали?" to listOf("Никогда", "Редко", "Иногда", "Часто", "Очень часто"),
-        "Как часто за последний месяц вы чувствовали, что вас беспокоит будущее?" to listOf("Никогда", "Редко", "Иногда", "Часто", "Очень часто"),
-        "Как часто за последний месяц вы испытывали проблемы со сном из-за переживаний?" to listOf("Никогда", "Редко", "Иногда", "Часто", "Очень часто"),
-        "Как часто за последний месяц вы чувствовали, что вас не понимают окружающие?" to listOf("Никогда", "Редко", "Иногда", "Часто", "Очень часто"),
-        "Как часто за последний месяц вы испытывали трудности с концентрацией?" to listOf("Никогда", "Редко", "Иногда", "Часто", "Очень часто"),
-        "Как часто за последний месяц вы ощущали нехватку поддержки со стороны окружающих?" to listOf("Никогда", "Редко", "Иногда", "Часто", "Очень часто"),
-        "Как часто за последний месяц вы чувствовали, что ваша жизнь выходит из-под контроля?" to listOf("Никогда", "Редко", "Иногда", "Часто", "Очень часто"),
-        "Как часто за последний месяц вы ощущали физическую усталость без видимой причины?" to listOf("Никогда", "Редко", "Иногда", "Часто", "Очень часто"),
-        "Как часто за последний месяц у вас были проблемы с аппетитом (переедание или потеря аппетита)?" to listOf("Никогда", "Редко", "Иногда", "Часто", "Очень часто"),
-        "Как часто за последний месяц вы чувствовали, что вам сложно расслабиться?" to listOf("Никогда", "Редко", "Иногда", "Часто", "Очень часто"),
-        "Как часто за последний месяц вы испытывали раздражительность без видимой причины?" to listOf("Никогда", "Редко", "Иногда", "Часто", "Очень часто"),
-        "Как часто за последний месяц вы замечали у себя перепады настроения?" to listOf("Никогда", "Редко", "Иногда", "Часто", "Очень часто"),
-        "Как часто за последний месяц вы чувствовали нехватку мотивации?" to listOf("Никогда", "Редко", "Иногда", "Часто", "Очень часто"),
-        "Как часто за последний месяц вы испытывали трудности в общении с людьми?" to listOf("Никогда", "Редко", "Иногда", "Часто", "Очень часто")
-    )
+fun getRandomQuestions(context: Context): List<Pair<String, List<String>>> {
+    val questionsArray = context.resources.getStringArray(R.array.questions)
+    val answersArray = context.resources.getStringArray(R.array.answers)
+    val answers = answersArray.toList()
+    val allQuestions = questionsArray.map { question ->
+        question to answers
+    }
+    return allQuestions.shuffled().take(20)
 }
+
+
+
+
 
 
 

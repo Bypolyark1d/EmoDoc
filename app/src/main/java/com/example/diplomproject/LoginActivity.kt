@@ -82,9 +82,9 @@ fun LoginScreen(navController: NavController, viewModel: AuthViewModel = viewMod
                 contentDescription = "App Logo",
                 modifier = Modifier.size(225.dp)
             )
-            Spacer(modifier = Modifier.height(24.dp))
-            Text("Добро пожаловать!", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color(0xFF2A3439))
-            Spacer(modifier = Modifier.height(70.dp))
+            Spacer(modifier = Modifier.height(100.dp))
+            Text("Добро пожаловать!", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = Color(0xFF2A3439))
+            Spacer(modifier = Modifier.height(150.dp))
             Button(
                 onClick = { signInLauncher.launch(signInClient.signInIntent) },
                 modifier = Modifier

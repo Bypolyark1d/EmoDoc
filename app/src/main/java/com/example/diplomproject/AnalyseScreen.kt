@@ -1,4 +1,5 @@
 package com.example.diplomproject
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +19,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -45,27 +48,46 @@ fun AnalizeScreen(navController: NavController, onMenuClick: () -> Unit) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(200.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFC8E6C9)),
                     shape = RoundedCornerShape(12.dp),
                     elevation = CardDefaults.cardElevation(6.dp)
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
+                    Box(
+                        modifier = Modifier.fillMaxSize()
                     ) {
-                        Text(
-                            text = "История Анализов",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold
+                        Image(
+                            painter = painterResource(id = R.drawable.card1),
+                            contentDescription = "Фон карточки",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Просматривайте историю анализов.",
-                            fontSize = 14.sp
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Black.copy(alpha = 0.2f))
                         )
+
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(16.dp),
+                            verticalArrangement = Arrangement.Bottom,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "История Анализов",
+                                fontSize = 22.sp,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Просматривайте историю анализов.",
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 18.sp
+                            )
+                        }
                     }
                 }
 
@@ -137,10 +159,3 @@ fun AnalizeScreen(navController: NavController, onMenuClick: () -> Unit) {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun ScreenPreview() {
-    EmotionTheme {
-        val navController = rememberNavController()
-    }
-}

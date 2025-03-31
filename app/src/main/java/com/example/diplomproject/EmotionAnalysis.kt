@@ -3,6 +3,7 @@ package com.example.diplomproject
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,8 +31,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -79,6 +83,41 @@ fun EmotionAnalysisScreen(navController: NavHostController) {
                     modifier = Modifier.weight(1f)
                 )
             }
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(300.dp)
+                    .padding(vertical = 16.dp)
+                    .shadow(10.dp, RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(16.dp)),
+                elevation = CardDefaults.cardElevation(6.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF4E756E)),
+                shape = RectangleShape
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Spacer(modifier = Modifier.weight(1f))
+                    Column {
+                        Text(
+                            text = "Описание анализа",
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                        Text(
+                            text = "Введите ваш текст, и наш алгоритм проанализирует ваше эмоциональное состояние.",
+                            fontSize = 18.sp,
+                            color = Color.White
+                        )
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(24.dp))
 
             val isFocused = remember { mutableStateOf(false) }
             val borderColor by animateColorAsState(
@@ -118,16 +157,15 @@ fun EmotionAnalysisScreen(navController: NavHostController) {
             Button(
                 onClick = { analysisResult = analyzeEmotion(text) },
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .border(2.dp, Color(0xFF2A3439), RoundedCornerShape(12.dp)),
+                    .fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFffece0),
-                    contentColor = Color(0xFF2A3439)
-                )
+                    containerColor = Color(0xFFed9a66),
+                    contentColor = Color.White
+                ),
+                shape = RoundedCornerShape(12.dp)
             ) {
                 Text(text = "Анализировать", fontSize = 18.sp)
             }
-
 
             Spacer(modifier = Modifier.height(24.dp))
 

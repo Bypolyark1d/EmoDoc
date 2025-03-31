@@ -20,6 +20,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
@@ -60,8 +62,8 @@ fun SplashScreen(navController: NavController, viewModel: AuthViewModel = viewMo
                 contentDescription = "Logo",
                 modifier = Modifier.size(225.dp)
             )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text("Emotional Security", fontSize = 24.sp, color = Color(0xFF2A3439))
+            Spacer(modifier = Modifier.height(70.dp))
+            Text("Emotion Doc", fontSize = 30.sp, fontWeight =  FontWeight.Bold, color = Color(0xFF2A3439))
         }
     }
 }

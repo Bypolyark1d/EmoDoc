@@ -2,6 +2,7 @@ package com.example.diplomproject
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -42,51 +43,64 @@ fun TopBar(title: String, onMenuClick: () -> Unit) {
 @Composable
 fun DrawerContent(navController: NavHostController, authViewModel: AuthViewModel, onClose: () -> Unit) {
     val user by authViewModel.user.collectAsState()
-    Column(
+
+    Box(
         modifier = Modifier
-            .fillMaxWidth(0.75f)
-            .fillMaxHeight()
-            .background(Color(0xFFed9a66))
-            .padding(16.dp),
-        horizontalAlignment = Alignment.Start
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.3f))
     ) {
-        Spacer(modifier = Modifier.height(50.dp))
-        // Профиль пользователя в Drawer
-        user?.let {
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Spacer(modifier = Modifier.width(12.dp))
-                Column {
-                    Text(it.displayName ?: "Без имени", color = Color(0xFF2A3439), fontSize = 22.sp, fontWeight = FontWeight.Bold)
-                    Text(it.email ?: "", color = Color.White, fontSize = 18.sp)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth(0.75f)
+                .fillMaxHeight()
+                .background(Color(0xFFed9a66))
+                .padding(16.dp),
+            horizontalAlignment = Alignment.Start
+        ) {
+            Spacer(modifier = Modifier.height(50.dp))
+
+            user?.let {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFF4E756E), RoundedCornerShape(12.dp))
+                        .padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column {
+                        Text(it.displayName ?: "Без имени", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                        Text(it.email ?: "", color = Color.White.copy(alpha = 0.8f), fontSize = 18.sp)
+                    }
                 }
-            }
-        } ?: Text("Неавторизованный пользователь", color = Color.White)
+            } ?: Text("Неавторизованный пользователь", color = Color.White)
 
-        Spacer(modifier = Modifier.height(24.dp))
-        Divider(color = Color.White.copy(alpha = 0.4f), thickness = 1.dp)
+            Spacer(modifier = Modifier.height(24.dp))
+            Divider(color = Color.White.copy(alpha = 0.4f), thickness = 1.dp)
 
-        // Меню
-        DrawerItem("Профиль", R.drawable.ic_profile) {
-            navController.navigate(Screens.Profile.route)
-            onClose()
-        }
-        DrawerItem("Анализ Эмоций", R.drawable.ic_analyse) {
-            navController.navigate(Screens.Analize.route)
-            onClose()
-        }
-        DrawerItem("Настройки", R.drawable.ic_settings) {
-            navController.navigate(Screens.Settings.route)
-            onClose()
-        }
-        DrawerItem("Выход", R.drawable.ic_exit) {
-            authViewModel.signOut()
-            navController.navigate(Screens.Login.route) {
-                popUpTo(0) { inclusive = true }
+            DrawerItem("Профиль", R.drawable.ic_profile) {
+                navController.navigate(Screens.Profile.route)
+                onClose()
             }
-            onClose()
+            DrawerItem("Анализ Эмоций", R.drawable.ic_analyse) {
+                navController.navigate(Screens.Analize.route)
+                onClose()
+            }
+            DrawerItem("Настройки", R.drawable.ic_settings) {
+                navController.navigate(Screens.Settings.route)
+                onClose()
+            }
+            DrawerItem("Выход", R.drawable.ic_exit) {
+                authViewModel.signOut()
+                navController.navigate(Screens.Login.route) {
+                    popUpTo(0) { inclusive = true }
+                }
+                onClose()
+            }
         }
     }
 }
+
 
 @Composable
 fun DrawerItem(title: String, iconRes: Int, onClick: () -> Unit) {

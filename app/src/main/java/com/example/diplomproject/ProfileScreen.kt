@@ -23,6 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -80,7 +82,7 @@ fun ProfileScreen(onMenuClick: () -> Unit, viewModel: AuthViewModel = viewModel(
                     user?.let {
                         Text(
                             text = "${it.displayName}",
-                            fontSize = 24.sp,
+                            fontSize = 26.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF2A3439)
                         )
@@ -95,7 +97,7 @@ fun ProfileScreen(onMenuClick: () -> Unit, viewModel: AuthViewModel = viewModel(
                     user?.let {
                         Text(
                             text = "Email: ${it.email}",
-                            fontSize = 16.sp,
+                            fontSize = 20.sp,
                             color = Color.White
                         )
                     }
@@ -107,7 +109,7 @@ fun ProfileScreen(onMenuClick: () -> Unit, viewModel: AuthViewModel = viewModel(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFed9a66)),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF4E756E)),
                 shape = RoundedCornerShape(16.dp),
                 elevation = CardDefaults.cardElevation(6.dp)
             ) {
@@ -118,17 +120,19 @@ fun ProfileScreen(onMenuClick: () -> Unit, viewModel: AuthViewModel = viewModel(
                     user?.let {
                         Text(
                             text = "Дата регистрации: Не указана",
-                            fontSize = 16.sp,
-                            color = Color(0xFF2A3439)
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color.White
                         )
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))
                     user?.let {
                         Text(
-                            text = "Количество дней обследований: Не указано",
-                            fontSize = 16.sp,
-                            color = Color(0xFF2A3439)
+                            text = "Дней обследований: Не указано",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color.White
                         )
                     }
 
@@ -136,8 +140,9 @@ fun ProfileScreen(onMenuClick: () -> Unit, viewModel: AuthViewModel = viewModel(
                     user?.let {
                         Text(
                             text = "Текущая эмоция: Не указана",
-                            fontSize = 16.sp,
-                            color = Color(0xFF2A3439)
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFed9a66)
                         )
                     }
                 }
