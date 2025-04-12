@@ -69,8 +69,8 @@ fun DrawerContent(navController: NavHostController, authViewModel: AuthViewModel
                 ) {
                     Spacer(modifier = Modifier.width(12.dp))
                     Column {
-                        Text(it.displayName ?: "Без имени", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold)
-                        Text(it.email ?: "", color = Color.White.copy(alpha = 0.8f), fontSize = 18.sp)
+                        Text(it.displayName ?: "Без имени", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                        Text(it.email ?: "Без почты", color = Color.White, fontSize = 14.sp)
                     }
                 }
             } ?: Text("Неавторизованный пользователь", color = Color.White)

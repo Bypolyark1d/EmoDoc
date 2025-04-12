@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -33,7 +34,8 @@ import com.example.diplomproject.ui.theme.EmotionTheme
 fun AnalizeScreen(navController: NavController, onMenuClick: () -> Unit) {
     Column(modifier = Modifier.fillMaxSize().background(Color(0xFFffece0))) {
         TopBar("Главная", onMenuClick)
-        Spacer(modifier = Modifier.height(100.dp))
+        Spacer(modifier = Modifier.height(30.dp))
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -47,7 +49,8 @@ fun AnalizeScreen(navController: NavController, onMenuClick: () -> Unit) {
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(200.dp),
+                        .height(200.dp)
+                        .clickable{(navController.navigate("statistic"))},
                     shape = RoundedCornerShape(12.dp),
                     elevation = CardDefaults.cardElevation(6.dp)
                 ) {
@@ -75,7 +78,7 @@ fun AnalizeScreen(navController: NavController, onMenuClick: () -> Unit) {
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = "История Анализов",
+                                text = "Статистика Анализов",
                                 fontSize = 22.sp,
                                 color = Color.White,
                                 fontWeight = FontWeight.Bold
@@ -84,12 +87,17 @@ fun AnalizeScreen(navController: NavController, onMenuClick: () -> Unit) {
                             Text(
                                 text = "Просматривайте историю анализов.",
                                 color = Color.White,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 18.sp
+                                fontSize = 16.sp
                             )
                         }
                     }
                 }
+
+                Divider(
+                    color = Color(0xFFed9a66),
+                    thickness = 2.dp,
+                    modifier = Modifier.padding(vertical = 16.dp)
+                )
 
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -101,56 +109,87 @@ fun AnalizeScreen(navController: NavController, onMenuClick: () -> Unit) {
                             .weight(1.5f)
                             .height(300.dp)
                             .clickable { navController.navigate(Screens.EmotionAnalysis.route) },
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFBBDEFB)),
                         shape = RoundedCornerShape(12.dp),
                         elevation = CardDefaults.cardElevation(6.dp)
                     ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(16.dp),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = "Анализ эмоционального состояния",
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            Image(
+                                painter = painterResource(id = R.drawable.card_profile),
+                                contentDescription = "Эмоциональное состояние",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize()
                             )
-                            Spacer(modifier = Modifier.height(12.dp))
-                            Text(
-                                text = "Анализируйте свое настроение с помощью ИИ.",
-                                fontSize = 14.sp
+
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color.Black.copy(alpha = 0.2f))
                             )
+
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(16.dp),
+                                verticalArrangement = Arrangement.Bottom,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = "Анализ эмоционального состояния",
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Text(
+                                    text = "Анализируйте свое настроение с помощью ИИ.",
+                                    fontSize = 16.sp,
+                                    color = Color.White
+                                )
+                            }
                         }
                     }
-
                     Card(
                         modifier = Modifier
                             .weight(1.5f)
                             .height(300.dp)
                             .clickable { navController.navigate(Screens.Survey.route) },
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFCDD2)),
                         shape = RoundedCornerShape(12.dp),
                         elevation = CardDefaults.cardElevation(6.dp)
                     ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(16.dp),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = "Анализ",
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            Image(
+                                painter = painterResource(id = R.drawable.stress_card),
+                                contentDescription = "Анализ настроения",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize()
                             )
-                            Spacer(modifier = Modifier.height(12.dp))
-                            Text(
-                                text = "Анализ качества настроения",
-                                fontSize = 14.sp
+
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color.Black.copy(alpha = 0.2f))
                             )
+
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(16.dp),
+                                verticalArrangement = Arrangement.Bottom,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = "Тестирование уровня стресса",
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Text(
+                                    text = "Узнайте свой текущий уровень стресса",
+                                    fontSize = 16.sp,
+                                    color = Color.White
+                                )
+                            }
                         }
                     }
                 }
@@ -158,4 +197,6 @@ fun AnalizeScreen(navController: NavController, onMenuClick: () -> Unit) {
         }
     }
 }
+
+
 

@@ -1,6 +1,7 @@
 package com.example.diplomproject
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -36,6 +37,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -77,7 +79,7 @@ fun EmotionAnalysisScreen(navController: NavHostController) {
                 Spacer(modifier = Modifier.width(40.dp))
                 Text(
                     text = "Анализ настроения",
-                    fontSize = 26.sp,
+                    fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF2A3439),
                     modifier = Modifier.weight(1f)
@@ -86,7 +88,7 @@ fun EmotionAnalysisScreen(navController: NavHostController) {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(300.dp)
+                    .height(250.dp)
                     .padding(vertical = 16.dp)
                     .shadow(10.dp, RoundedCornerShape(16.dp))
                     .clip(RoundedCornerShape(16.dp)),
@@ -94,26 +96,39 @@ fun EmotionAnalysisScreen(navController: NavHostController) {
                 colors = CardDefaults.cardColors(containerColor = Color(0xFF4E756E)),
                 shape = RectangleShape
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Spacer(modifier = Modifier.weight(1f))
-                    Column {
-                        Text(
-                            text = "Описание анализа",
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
-                        Text(
-                            text = "Введите ваш текст, и наш алгоритм проанализирует ваше эмоциональное состояние.",
-                            fontSize = 18.sp,
-                            color = Color.White
-                        )
+                Box(modifier = Modifier.fillMaxSize()) {
+                    Image(
+                        painter = painterResource(id = R.drawable.card_profile),
+                        contentDescription = "Анализ настроения",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.2f))
+                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Spacer(modifier = Modifier.weight(1f))
+                        Column {
+                            Text(
+                                text = "Описание анализа",
+                                fontSize = 22.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                            Text(
+                                text = "Введите ваш текст, и наш алгоритм проанализирует ваше эмоциональное состояние.",
+                                fontSize = 18.sp,
+                                color = Color.White
+                            )
+                        }
                     }
                 }
             }
@@ -127,7 +142,7 @@ fun EmotionAnalysisScreen(navController: NavHostController) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(300.dp)
+                    .height(250.dp)
                     .border(2.dp, borderColor, RoundedCornerShape(12.dp))
                     .background(Color(0xFFffece0), RoundedCornerShape(12.dp))
                     .padding(8.dp)

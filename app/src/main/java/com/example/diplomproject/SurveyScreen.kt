@@ -63,6 +63,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -80,9 +81,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun SurveyScreen(navController: NavController) {
     var testStarted by remember { mutableStateOf(false) }
-    var testResult by remember { mutableStateOf<String?>(null) }
     var stressLvl by remember { mutableStateOf<Float>(0f) }
-    var stressImageRes by remember { mutableStateOf<Int?>(null) }
 
     Box(
         modifier = Modifier
@@ -94,12 +93,12 @@ fun SurveyScreen(navController: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxSize()
         ) {
-            Spacer(modifier = Modifier.height(30.dp))
+            Spacer(modifier = Modifier.height(15.dp))
 
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp),
+                    .padding(bottom = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = { navController.popBackStack() }) {
@@ -113,17 +112,10 @@ fun SurveyScreen(navController: NavController) {
 
             if (testStarted) {
                 StressTestScreen(
-                    onFinish = { result, stressLevel ->
+                    onFinish = { stressLevel ->
                         testStarted = false
                         stressLvl = stressLevel
-                        testResult = result
-
-                        stressImageRes = when {
-                            stressLevel <= 2 -> R.drawable.emoji
-                            stressLevel <= 4 -> R.drawable.emoji
-                            stressLevel <= 7 -> R.drawable.emoji
-                            else -> R.drawable.emoji
-                        }
+                        navController.navigate(Screens.Result.createRoute(stressLvl))
                     }
                 )
             } else {
@@ -136,29 +128,42 @@ fun SurveyScreen(navController: NavController) {
                         .shadow(10.dp, RoundedCornerShape(16.dp))
                         .clip(RoundedCornerShape(16.dp)),
                     elevation = CardDefaults.cardElevation(6.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFed9a66)),
-                    shape = RectangleShape
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFed9a66))
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Spacer(modifier = Modifier.weight(1f))
-                        Column {
-                            Text(
-                                text = "Описание теста",
-                                fontSize = 22.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White,
-                                modifier = Modifier.padding(bottom = 8.dp)
-                            )
-                            Text(
-                                text = "Этот тест поможет вам определить уровень стресса. Ответьте на несколько вопросов, чтобы мы могли оценить вашу ситуацию.",
-                                fontSize = 18.sp,
-                                color = Color.White
-                            )
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        Image(
+                            painter = painterResource(id = R.drawable.card_profile),
+                            contentDescription = "Анализ настроения",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Black.copy(alpha = 0.2f))
+                        )
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(16.dp),
+                            verticalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Spacer(modifier = Modifier.weight(1f))
+                            Column {
+                                Text(
+                                    text = "Описание теста",
+                                    fontSize = 22.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White,
+                                    modifier = Modifier.padding(bottom = 8.dp)
+                                )
+                                Text(
+                                    text = "Этот тест поможет вам определить уровень стресса. Ответьте на несколько вопросов, чтобы мы могли оценить вашу ситуацию.",
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
+                            }
                         }
                     }
                 }
@@ -174,137 +179,10 @@ fun SurveyScreen(navController: NavController) {
                     title = "Посмотреть статистику",
                     iconRes = R.drawable.ic_stat
                 ) {
-                    navController.navigate("statisticScreen")
+                    navController.navigate("statistic")
                 }
             }
         }
-    }
-
-    testResult?.let { result ->
-        ResultDialog(resultText = result, stressImageRes = stressImageRes, stressLevel = stressLvl) {
-            testResult = null
-            stressImageRes = null
-        }
-    }
-}
-
-@Composable
-fun CircularStressIndicator(stressLevel: Float) {
-    val progress by animateFloatAsState(
-        targetValue = stressLevel / 10f,
-        animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing)
-    )
-
-    val color = when {
-        stressLevel < 3 -> Color(0xFF76D7B2) // Зеленый
-        stressLevel < 6 -> Color(0xFFF4D03F) // Желтый
-        else -> Color(0xFFFF5733) // Красный
-    }
-
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier.size(150.dp)
-    ) {
-        Canvas(modifier = Modifier.size(150.dp)) {
-            drawCircle(color.copy(alpha = 0.2f), radius = size.minDimension / 2)
-        }
-
-        CircularProgressIndicator(
-            progress = progress,
-            strokeWidth = 12.dp,
-            color = color,
-            modifier = Modifier.size(130.dp)
-        )
-
-        Text(
-            text = "${(stressLevel * 10).toInt()}%",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            color = color
-        )
-    }
-}
-
-@Composable
-fun ResultDialog(resultText: String, stressImageRes: Int?, stressLevel: Float, onDismiss: () -> Unit) {
-    var isVisible by remember { mutableStateOf(false) }
-
-    LaunchedEffect(stressImageRes) {
-        isVisible = true
-    }
-    AnimatedVisibility(
-        visible = isVisible,
-        enter = fadeIn(animationSpec = tween(durationMillis = 500)) + expandVertically(),
-        exit = fadeOut(animationSpec = tween(durationMillis = 300)) + shrinkVertically(),
-    ) {
-        AlertDialog(
-            onDismissRequest = onDismiss,
-            containerColor = Color(0xFFffece0),
-            shape = RoundedCornerShape(16.dp),
-            title = {
-                Text(
-                    text = "Результат теста",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF2A3439),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            },
-            text = {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    stressImageRes?.let { imageRes ->
-                        Image(
-                            painter = painterResource(id = imageRes),
-                            contentDescription = "Stress level image",
-                            modifier = Modifier
-                                .size(150.dp)
-                                .padding(bottom = 16.dp)
-                        )
-                    }
-                    Text(
-                        text = resultText,
-                        fontSize = 18.sp,
-                        color = Color(0xFF2A3439),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth().padding(8.dp)
-                    )
-                    Text(
-                        text = "Уровень стресса: ${"%.1f".format(stressLevel)}",
-                        fontSize = 18.sp,
-                        color = Color(0xFF2A3439),
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(top = 16.dp)
-                    )
-                    Spacer(modifier = Modifier.height(10.dp))
-                    // Шкала стресса
-                    CircularStressIndicator(stressLevel = stressLevel)
-                }
-            },
-            confirmButton = {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(10.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Button(
-                        modifier = Modifier
-                            .border(2.dp, Color(0xFF2A3439), RoundedCornerShape(8.dp))
-                            .width(100.dp),
-                        onClick = onDismiss,
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFffece0))
-                    ) {
-                        Text(
-                            text = "ОК",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF2A3439)
-                        )
-                    }
-                }
-            }
-        )
     }
 }
 
@@ -345,15 +223,11 @@ fun SurveyCard(title: String, iconRes: Int, onClick: () -> Unit) {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun ResultDialogPreview() {
 
-}
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun StressTestScreen(onFinish: (String, Float) -> Unit) {
+fun StressTestScreen(onFinish: (Float) -> Unit) {
     var questionIndex by remember { mutableStateOf(0) }
     val context = LocalContext.current
     val questions = remember { getRandomQuestions(context) }
@@ -362,7 +236,6 @@ fun StressTestScreen(onFinish: (String, Float) -> Unit) {
     val scores = listOf(0, 1, 2, 3, 4)
 
     var userScores by remember { mutableStateOf(List(questions.size) { 0 }) }
-    var resultText by remember { mutableStateOf("") }
     var stressLevel by remember { mutableStateOf(0f) }
     var totalScore by remember { mutableStateOf(0) }
 
@@ -392,7 +265,7 @@ fun StressTestScreen(onFinish: (String, Float) -> Unit) {
                 color = primaryColor,
                 trackColor = Color(0xFFE0E0E0)
             )
-            Spacer(modifier = Modifier.height(25.dp))
+            Spacer(modifier = Modifier.height(15.dp))
 
             AnimatedContent(
                 targetState = questionIndex,
@@ -419,7 +292,7 @@ fun StressTestScreen(onFinish: (String, Float) -> Unit) {
                     ) {
                         Text(
                             text = questions[targetIndex].first,
-                            fontSize = 22.sp,
+                            fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White,
                             textAlign = TextAlign.Center
@@ -428,7 +301,7 @@ fun StressTestScreen(onFinish: (String, Float) -> Unit) {
                 }
             }
 
-            Spacer(modifier = Modifier.height(25.dp))
+            Spacer(modifier = Modifier.height(20.dp))
             questions[questionIndex].second.forEachIndexed { index, answer ->
                 var isClicked by remember { mutableStateOf(false) }
                 val scale by animateFloatAsState(
@@ -441,7 +314,7 @@ fun StressTestScreen(onFinish: (String, Float) -> Unit) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 8.dp)
-                        .height(70.dp)
+                        .height(65.dp)
                         .graphicsLayer(scaleX = scale, scaleY = scale)
                         .clickable {
                             isClicked = true
@@ -458,14 +331,7 @@ fun StressTestScreen(onFinish: (String, Float) -> Unit) {
                                     questionIndex++
                                 } else {
                                     stressLevel = (totalScore.toFloat() / (questions.size * 4)) * 10f
-                                    resultText = when {
-                                        totalScore <= 16 -> "Очень низкий уровень стресса"
-                                        totalScore <= 26 -> "Низкий уровень стресса"
-                                        totalScore <= 34 -> "Средний уровень стресса"
-                                        totalScore <= 48 -> "Высокий уровень стресса"
-                                        else -> "Очень высокий уровень стресса"
-                                    }
-                                    onFinish(resultText, stressLevel)
+                                    onFinish(stressLevel)
                                     totalScore = 0
                                 }
                             }
