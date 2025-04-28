@@ -74,12 +74,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.diplomproject.ViewModel.StressSurveyViewModel
+import com.example.diplomproject.data.StressSurveyResult
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 @Composable
-fun SurveyScreen(navController: NavController) {
+fun SurveyScreen(navController: NavController,viewModel: StressSurveyViewModel = viewModel()) {
     var testStarted by remember { mutableStateOf(false) }
     var stressLvl by remember { mutableStateOf<Float>(0f) }
 
@@ -112,10 +116,11 @@ fun SurveyScreen(navController: NavController) {
 
             if (testStarted) {
                 StressTestScreen(
-                    onFinish = { stressLevel ->
+                    viewModel = viewModel,
+                    onComplete = { stressLevel ->
                         testStarted = false
                         stressLvl = stressLevel
-                        navController.navigate(Screens.Result.createRoute(stressLvl))
+                        navController.navigate("stress_result")
                     }
                 )
             } else {
@@ -227,7 +232,7 @@ fun SurveyCard(title: String, iconRes: Int, onClick: () -> Unit) {
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun StressTestScreen(onFinish: (Float) -> Unit) {
+fun StressTestScreen(viewModel: StressSurveyViewModel, onComplete: (Float) -> Unit) {
     var questionIndex by remember { mutableStateOf(0) }
     val context = LocalContext.current
     val questions = remember { getRandomQuestions(context) }
@@ -237,7 +242,6 @@ fun StressTestScreen(onFinish: (Float) -> Unit) {
 
     var userScores by remember { mutableStateOf(List(questions.size) { 0 }) }
     var stressLevel by remember { mutableStateOf(0f) }
-    var totalScore by remember { mutableStateOf(0) }
 
     val coroutineScope = rememberCoroutineScope()
 
@@ -321,18 +325,24 @@ fun StressTestScreen(onFinish: (Float) -> Unit) {
                             val updatedScores = userScores.toMutableList()
                             updatedScores[questionIndex] = scores[index]
                             userScores = updatedScores
-                            totalScore += scores[index]
 
                             coroutineScope.launch {
                                 delay(150)
                                 isClicked = false
-                                Log.d("StressTest", "Answer selected: ${scores[index]} for question ${questionIndex + 1}")
                                 if (questionIndex < questions.size - 1) {
                                     questionIndex++
                                 } else {
-                                    stressLevel = (totalScore.toFloat() / (questions.size * 4)) * 10f
-                                    onFinish(stressLevel)
-                                    totalScore = 0
+                                    val totalScore = userScores.sum()
+                                    val normalizedLevel = (totalScore.toFloat() / (questions.size * 4)) * 10f
+                                    val stressAsInt = normalizedLevel.roundToInt()
+
+                                    val userId = "defaultUser"
+                                    val result = StressSurveyResult(
+                                        userId = userId,
+                                        stressLevel = stressAsInt.toFloat() // если в Firestore ожидается float
+                                    )
+                                    viewModel.setStressResult(result)
+                                    onComplete(stressAsInt.toFloat())
                                 }
                             }
                         },

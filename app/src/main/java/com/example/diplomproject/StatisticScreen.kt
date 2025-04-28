@@ -26,7 +26,6 @@ import androidx.navigation.NavController
 
 @Composable
 fun StatisticScreen(navController: NavController) {
-    // Тут можно добавить состояние, если нужно, для статистики, например:
     val statisticData = remember { mutableStateOf("Здесь будет отображаться статистика...") }
 
     Box(
@@ -54,8 +53,6 @@ fun StatisticScreen(navController: NavController) {
                     )
                 }
             }
-
-            // Основное содержимое экрана статистики
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -68,7 +65,6 @@ fun StatisticScreen(navController: NavController) {
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
 
-                // Отображение данных статистики
                 Text(
                     text = statisticData.value,
                     fontSize = 18.sp,

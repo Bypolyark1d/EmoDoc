@@ -1,5 +1,6 @@
 package com.example.diplomproject
 
+import android.util.Log
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -22,10 +23,13 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,13 +47,21 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.diplomproject.ViewModel.EmotionAnalysisViewModel
+import com.example.diplomproject.ViewModel.EmotionResultViewModel
+import com.google.firebase.auth.FirebaseAuth
+
 
 @Composable
-fun EmotionAnalysisScreen(navController: NavHostController) {
+fun EmotionAnalysisScreen(navController: NavHostController,resultViewModel: EmotionResultViewModel = viewModel(), viewModel: EmotionAnalysisViewModel = viewModel()) {
     var text by remember { mutableStateOf("") }
-    var analysisResult by remember { mutableStateOf<String?>(null) }
     val maxChars = 1000
+    val isLoading = remember { mutableStateOf(false) }
+    val emotionResult by viewModel.emotionResult.collectAsState()
+    val error by viewModel.error.collectAsState()
+
     val charCount = text.length
 
     Box(
@@ -85,6 +97,8 @@ fun EmotionAnalysisScreen(navController: NavHostController) {
                     modifier = Modifier.weight(1f)
                 )
             }
+
+            // Карточка с описанием анализа
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -170,7 +184,11 @@ fun EmotionAnalysisScreen(navController: NavHostController) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = { analysisResult = analyzeEmotion(text) },
+                onClick = {
+                    val userId = FirebaseAuth.getInstance().currentUser?.uid ?: "unknown_user"
+                    isLoading.value = true
+                    viewModel.analyzeText(text,userId)
+                },
                 modifier = Modifier
                     .fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
@@ -183,38 +201,20 @@ fun EmotionAnalysisScreen(navController: NavHostController) {
             }
 
             Spacer(modifier = Modifier.height(24.dp))
-
-            // Вывод результата анализа
-            analysisResult?.let {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    elevation = CardDefaults.cardElevation(6.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFC8E6C9))
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(text = "Результат анализа:", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(text = it, fontSize = 16.sp)
-                    }
+            error?.let {
+                Text(text = it, color = Color.Red)
+            }
+            if (isLoading.value) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+            }
+            LaunchedEffect(emotionResult) {
+                emotionResult?.let {
+                    Log.d("EmotionAnalysisScreen", "Analysis result received: $it")
+                    isLoading.value = false
+                    resultViewModel.setEmotionEntry(it)
+                    navController.navigate("emotion_result")
                 }
             }
         }
-    }
-}
-
-
-
-
-//
-fun analyzeEmotion(text: String): String {
-    return when {
-        text.contains("счастлив", true) -> "😊 Радость"
-        text.contains("грусть", true) -> "😢 Грусть"
-        text.contains("злой", true) -> "😡 Злость"
-        else -> "🤔 Не удалось определить эмоцию"
     }
 }

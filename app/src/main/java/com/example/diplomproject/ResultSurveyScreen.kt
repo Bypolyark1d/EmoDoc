@@ -24,6 +24,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,8 +37,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.diplomproject.ViewModel.EmotionResultViewModel
+import com.example.diplomproject.ViewModel.EntryViewModel
+import com.example.diplomproject.ViewModel.ProfileViewModel
+import com.example.diplomproject.ViewModel.StressSurveyViewModel
 
 @Composable
 fun CircularStressIndicator(stressLevel: Float) {
@@ -76,8 +82,11 @@ fun CircularStressIndicator(stressLevel: Float) {
     }
 }
 @Composable
-fun ResultScreen(navController: NavController, stressLevel: Float) {
+fun ResultScreen(navController: NavController, viewModel: StressSurveyViewModel = viewModel(), profileViewModel: ProfileViewModel = viewModel()) {
+    val stressResult by viewModel.stressResult.collectAsState()
+    val stressLevel = (stressResult?.stressLevel ?: 0.0).toFloat()
     val stressDescription = getStressDescription(stressLevel)
+    val entryViewModel: EntryViewModel = viewModel()
     val context = LocalContext.current
     val recommendations = getRecommendations(context, stressLevel)
 
@@ -119,7 +128,7 @@ fun ResultScreen(navController: NavController, stressLevel: Float) {
                     modifier = Modifier.padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    CircularStressIndicator(stressLevel)  // Шкала стресса
+                    CircularStressIndicator(stressLevel)
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = "Ваш уровень стресса: ${"%.1f".format(stressLevel)}",
@@ -190,7 +199,10 @@ fun ResultScreen(navController: NavController, stressLevel: Float) {
             Spacer(modifier = Modifier.weight(0.5f))
 
             Button(
-                onClick = { navController.popBackStack() },
+                onClick = { navController.popBackStack()
+                    entryViewModel.saveStressSurveyResult(stressLevel)
+                    profileViewModel.incrementEntryCount()
+                    profileViewModel.updateStressLevel(stressLevel)},
                 modifier = Modifier
                     .fillMaxWidth(0.7f)
                     .height(50.dp)
@@ -209,7 +221,7 @@ fun ResultScreen(navController: NavController, stressLevel: Float) {
 @Composable
 fun PreviewResultScreen() {
     val navController = rememberNavController()
-    ResultScreen(navController, stressLevel = 5.0f)
+    //ResultScreen(navController, stressLevel = 5.0f)
 }
 fun getRecommendations(context: Context, stressLevel: Float): List<String> {
     val recommendations = when {

@@ -18,6 +18,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -35,12 +36,16 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberImagePainter
 import com.example.diplomproject.ViewModel.AuthViewModel
+import com.example.diplomproject.ViewModel.ProfileViewModel
 
 
 @Composable
-fun ProfileScreen(onMenuClick: () -> Unit, viewModel: AuthViewModel = viewModel()) {
-    val user by viewModel.user.collectAsState()
-
+fun ProfileScreen(onMenuClick: () -> Unit, authViewModel: AuthViewModel = viewModel(), profileViewModel: ProfileViewModel = viewModel()) {
+    val user by authViewModel.user.collectAsState()
+    val userProfile by profileViewModel.userProfile.collectAsState()
+    LaunchedEffect(Unit) {
+        profileViewModel.fetchUserProfile()
+    }
     val backgroundColor = Color(0xFFffece0)
 
     Column(modifier = Modifier.fillMaxSize().background(backgroundColor)) {
@@ -105,15 +110,10 @@ fun ProfileScreen(onMenuClick: () -> Unit, viewModel: AuthViewModel = viewModel(
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
                             )
-                        } ?: Text(
-                            "Ошибка загрузки пользователя",
-                            fontSize = 16.sp,
-                            color = Color.Red
-                        )
-
+                        }
                         Spacer(modifier = Modifier.height(8.dp))
 
-                        user?.let {
+                        userProfile?.let {
                             Text(
                                 text = "Email: ${it.email}",
                                 fontSize = 16.sp,
@@ -143,9 +143,9 @@ fun ProfileScreen(onMenuClick: () -> Unit, viewModel: AuthViewModel = viewModel(
                     modifier = Modifier.padding(24.dp),
                     horizontalAlignment = Alignment.Start
                 ) {
-                    user?.let {
+                    userProfile?.let {
                         Text(
-                            text = "Дата регистрации: Не указана",
+                            text = "Шкала стресса: ${it.stressLevel} ",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Medium,
                             color = Color.White
@@ -153,9 +153,9 @@ fun ProfileScreen(onMenuClick: () -> Unit, viewModel: AuthViewModel = viewModel(
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))
-                    user?.let {
+                    userProfile?.let {
                         Text(
-                            text = "Дней обследований: Не указано",
+                            text = "Число обследований: ${it.countEntry}",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Medium,
                             color = Color.White
@@ -210,6 +210,7 @@ fun getEmotionImage(emotion: String?): Painter {
         "Счастлив" -> painterResource(id = R.drawable.emoji)
         "Грусть" -> painterResource(id = R.drawable.emoji)
         "Гнев" -> painterResource(id = R.drawable.emoji)
+        "Страх"-> painterResource(id = R.drawable.emoji)
         "Удивление" -> painterResource(id = R.drawable.emoji)
         else -> painterResource(id = R.drawable.emoji)
     }
