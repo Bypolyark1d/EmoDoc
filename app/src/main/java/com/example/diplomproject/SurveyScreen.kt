@@ -13,7 +13,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.with
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -83,7 +85,7 @@ import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 @Composable
-fun SurveyScreen(navController: NavController,viewModel: StressSurveyViewModel = viewModel()) {
+fun SurveyScreen(navController: NavController, viewModel: StressSurveyViewModel = viewModel()) {
     var testStarted by remember { mutableStateOf(false) }
     var stressLvl by remember { mutableStateOf<Float>(0f) }
 
@@ -114,7 +116,17 @@ fun SurveyScreen(navController: NavController,viewModel: StressSurveyViewModel =
                 }
             }
 
-            if (testStarted) {
+            AnimatedVisibility(
+                visible = testStarted,
+                enter = fadeIn(animationSpec = tween(durationMillis = 1000)) + slideInVertically(
+                    initialOffsetY = { -it },
+                    animationSpec = tween(durationMillis = 1000)
+                ),
+                exit = fadeOut(animationSpec = tween(durationMillis = 1000)) + slideOutVertically(
+                    targetOffsetY = { -it },
+                    animationSpec = tween(durationMillis = 1000)
+                )
+            ) {
                 StressTestScreen(
                     viewModel = viewModel,
                     onComplete = { stressLevel ->
@@ -123,7 +135,9 @@ fun SurveyScreen(navController: NavController,viewModel: StressSurveyViewModel =
                         navController.navigate("stress_result")
                     }
                 )
-            } else {
+            }
+
+            if (!testStarted) {
                 Spacer(modifier = Modifier.height(30.dp))
                 Card(
                     modifier = Modifier

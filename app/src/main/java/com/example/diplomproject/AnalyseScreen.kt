@@ -32,6 +32,7 @@ import com.example.diplomproject.ui.theme.EmotionTheme
 
 @Composable
 fun AnalizeScreen(navController: NavController, onMenuClick: () -> Unit) {
+
     Column(modifier = Modifier.fillMaxSize().background(Color(0xFFffece0))) {
         TopBar("Главная", onMenuClick)
         Spacer(modifier = Modifier.height(30.dp))

@@ -1,6 +1,11 @@
 package com.example.diplomproject.TextPreProccesor
 import android.content.Context
 import android.util.Log
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.painterResource
+import com.example.diplomproject.R
 import opennlp.tools.stemmer.PorterStemmer
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -77,5 +82,17 @@ fun getEmotionIndex(name: String): Int {
         "Страх" -> 4
         "Удивление" -> 5
         else -> -1
+    }
+}
+@Composable
+fun getEmotionImageAndColor(emotion: Int): Pair<Painter, Color> {
+    return when (emotion) {
+        0 -> painterResource(id = R.drawable.sad) to Color(0xFF3498DB) // Грусть
+        1 -> painterResource(id = R.drawable.joy) to Color(0xFFF1C40F) // Радость
+        2 -> painterResource(id = R.drawable.love) to Color(0xFFE74C3C) // Любовь
+        3 -> painterResource(id = R.drawable.angry) to Color(0xFFC0392B) // Злость
+        4 -> painterResource(id = R.drawable.fear) to Color(0xFF7F8C8D) // Страх
+        5 -> painterResource(id = R.drawable.surprise) to Color(0xFF9B59B6) // Удивление
+        else -> painterResource(id = R.drawable.neutral) to Color(0xFF95A5A6) // Нейтральный
     }
 }

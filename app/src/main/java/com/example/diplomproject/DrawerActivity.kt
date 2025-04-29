@@ -123,16 +123,6 @@ fun DrawerItem(title: String, iconRes: Int, onClick: () -> Unit) {
 }
 
 
-@Composable
-fun SettingsScreen(onMenuClick: () -> Unit) {
-    Column(modifier = Modifier.fillMaxSize().background(Color(0xFFffece0))) {
-        TopBar("Настройки", onMenuClick)
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("Настройки", fontSize = 24.sp)
-        }
-    }
-}
-
 // Превью
 @Preview(showBackground = true)
 @Composable

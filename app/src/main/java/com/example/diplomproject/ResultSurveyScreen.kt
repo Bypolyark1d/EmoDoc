@@ -1,9 +1,14 @@
 package com.example.diplomproject
 
 import android.content.Context
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -24,8 +29,12 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -90,128 +99,150 @@ fun ResultScreen(navController: NavController, viewModel: StressSurveyViewModel 
     val context = LocalContext.current
     val recommendations = getRecommendations(context, stressLevel)
 
+    var isUIVisible by remember { mutableStateOf(false) }
+
+    // Trigger visibility change
+    LaunchedEffect(Unit) {
+        isUIVisible = true
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFffece0))
             .padding(16.dp)
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
+        // AnimatedVisibility for the UI
+        AnimatedVisibility(
+            visible = isUIVisible,
+            enter = fadeIn(animationSpec = tween(durationMillis = 1000)) + slideInVertically(
+                initialOffsetY = { -it },
+                animationSpec = tween(durationMillis = 1000)
+            ),
+            exit = fadeOut(animationSpec = tween(durationMillis = 1000)) + slideOutVertically(
+                targetOffsetY = { -it },
+                animationSpec = tween(durationMillis = 1000)
+            )
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Spacer(Modifier.height(50.dp))
-                Text(
-                    text = "Результат теста",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF2A3439)
-                )
-            }
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp)
-                    .shadow(6.dp, RoundedCornerShape(16.dp))
-                    .clip(RoundedCornerShape(16.dp)),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(4.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
                 ) {
-                    CircularStressIndicator(stressLevel)
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(Modifier.height(50.dp))
                     Text(
-                        text = "Ваш уровень стресса: ${"%.1f".format(stressLevel)}",
-                        fontSize = 18.sp,
+                        text = "Результат теста",
+                        fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF2A3439),
-                        textAlign = TextAlign.Center
+                        color = Color(0xFF2A3439)
                     )
-                    Spacer(modifier = Modifier.height(15.dp))
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp)
-                            .shadow(6.dp, RoundedCornerShape(16.dp))
-                            .clip(RoundedCornerShape(16.dp)),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFed9a66)),
-                        elevation = CardDefaults.cardElevation(4.dp)
+                }
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp)
+                        .shadow(6.dp, RoundedCornerShape(16.dp))
+                        .clip(RoundedCornerShape(16.dp)),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(4.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                        CircularStressIndicator(stressLevel)
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "Ваш уровень стресса: ${"%.1f".format(stressLevel)}",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF2A3439),
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(15.dp))
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 8.dp)
+                                .shadow(6.dp, RoundedCornerShape(16.dp))
+                                .clip(RoundedCornerShape(16.dp)),
+                            colors = CardDefaults.cardColors(containerColor = Color(0xFFed9a66)),
+                            elevation = CardDefaults.cardElevation(4.dp)
                         ) {
-                            Text(
-                                text = stressDescription,
-                                fontSize = 16.sp,
-                                color = Color(0xFF2A3439),
-                                fontWeight = FontWeight.Medium,
-                                textAlign = TextAlign.Center
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp)
-                            .shadow(6.dp, RoundedCornerShape(16.dp))
-                            .clip(RoundedCornerShape(16.dp)),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFF4E756E)),
-                        elevation = CardDefaults.cardElevation(4.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            horizontalAlignment = Alignment.Start
-                        ) {
-                            Text(
-                                text = "Рекомендации:",
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White,
-                                modifier = Modifier.padding(bottom = 8.dp)
-                            )
-                            recommendations.forEach {
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
                                 Text(
-                                    text = "• $it",
-                                    fontSize = 18.sp,
-                                    color = Color.White
+                                    text = stressDescription,
+                                    fontSize = 16.sp,
+                                    color = Color(0xFF2A3439),
+                                    fontWeight = FontWeight.Medium,
+                                    textAlign = TextAlign.Center
                                 )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 8.dp)
+                                .shadow(6.dp, RoundedCornerShape(16.dp))
+                                .clip(RoundedCornerShape(16.dp)),
+                            colors = CardDefaults.cardColors(containerColor = Color(0xFF4E756E)),
+                            elevation = CardDefaults.cardElevation(4.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                horizontalAlignment = Alignment.Start
+                            ) {
+                                Text(
+                                    text = "Рекомендации:",
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White,
+                                    modifier = Modifier.padding(bottom = 8.dp)
+                                )
+                                recommendations.forEach {
+                                    Text(
+                                        text = "• $it",
+                                        fontSize = 18.sp,
+                                        color = Color.White
+                                    )
+                                }
                             }
                         }
                     }
                 }
+
+
+                Spacer(modifier = Modifier.weight(0.5f))
+
+                Button(
+                    onClick = {
+                        navController.popBackStack()
+                        entryViewModel.saveStressSurveyResult(stressLevel)
+                        profileViewModel.incrementEntryCount()
+                        profileViewModel.updateStressLevel(stressLevel)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth(0.7f)
+                        .height(50.dp)
+                        .clip(RoundedCornerShape(12.dp)),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFed9a66))
+                ) {
+                    Text("Ок", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                }
+                Spacer(modifier = Modifier.weight(0.5f))
             }
-
-
-            Spacer(modifier = Modifier.weight(0.5f))
-
-            Button(
-                onClick = { navController.popBackStack()
-                    entryViewModel.saveStressSurveyResult(stressLevel)
-                    profileViewModel.incrementEntryCount()
-                    profileViewModel.updateStressLevel(stressLevel)},
-                modifier = Modifier
-                    .fillMaxWidth(0.7f)
-                    .height(50.dp)
-                    .clip(RoundedCornerShape(12.dp)),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFed9a66))
-            ) {
-                Text("Ок", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            }
-            Spacer(modifier = Modifier.weight(0.5f))
         }
     }
 }

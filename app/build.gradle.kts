@@ -40,6 +40,8 @@ android {
     }
 }
 dependencies {
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    implementation ("androidx.compose.runtime:runtime-livedata:1.5.4")
     implementation ("com.google.code.gson:gson:2.8.8")
     implementation("org.apache.opennlp:opennlp-tools:1.9.4")
     implementation("com.google.ai.edge.litert:litert:1.0.1")
