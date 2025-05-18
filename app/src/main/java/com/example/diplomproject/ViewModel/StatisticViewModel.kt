@@ -16,6 +16,8 @@ class StatisticViewModel : ViewModel() {
     private val db = Firebase.firestore
     private val auth = FirebaseAuth.getInstance()
 
+    private val _emotionEntries = MutableLiveData<List<EmotionEntry>>()
+    val emotionEntries: LiveData<List<EmotionEntry>> = _emotionEntries
     private val _stressSurveyResults = MutableLiveData<List<StressSurveyResult>>()
     val stressSurveyResults: LiveData<List<StressSurveyResult>> = _stressSurveyResults
 
@@ -25,7 +27,6 @@ class StatisticViewModel : ViewModel() {
     private val _lastSurveyPerDay = MutableLiveData<Map<String, StressSurveyResult>>()
     val lastSurveyPerDay: LiveData<Map<String, StressSurveyResult>> = _lastSurveyPerDay
 
-    // Получить последние N обследований
     fun getStressSurveyResults(lastN: Int) {
         val userId = auth.currentUser?.uid ?: return
         db.collection("users")
@@ -40,8 +41,6 @@ class StatisticViewModel : ViewModel() {
             }
             .addOnFailureListener { Log.e("Firestore", "Error fetching surveys", it) }
     }
-
-    // Получить распределение эмоций
     fun getEmotionDistribution() {
         val userId = auth.currentUser?.uid ?: return
         db.collection("users")
@@ -58,8 +57,6 @@ class StatisticViewModel : ViewModel() {
             }
             .addOnFailureListener { Log.e("Firestore", "Error fetching emotions", it) }
     }
-
-    // Получить последнее обследование для каждого дня
     fun getLastSurveyPerDay() {
         val userId = auth.currentUser?.uid ?: return
         db.collection("users")
@@ -81,5 +78,32 @@ class StatisticViewModel : ViewModel() {
                 _lastSurveyPerDay.value = lastSurveyPerDay
             }
             .addOnFailureListener { Log.e("Firestore", "Error fetching surveys", it) }
+    }
+    fun getStressHistory() {
+        val userId = auth.currentUser?.uid ?: return
+        db.collection("users")
+            .document(userId)
+            .collection("surveys")
+            .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                val results = snapshot.documents.mapNotNull { it.toObject(StressSurveyResult::class.java) }
+                _stressSurveyResults.value = results
+            }
+            .addOnFailureListener { Log.e("Firestore", "Error fetching stress history", it) }
+    }
+
+    fun getEmotionHistory() {
+        val userId = auth.currentUser?.uid ?: return
+        db.collection("users")
+            .document(userId)
+            .collection("entries")
+            .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                val emotionResults = snapshot.documents.mapNotNull { it.toObject(EmotionEntry::class.java) }
+                _emotionEntries.value = emotionResults
+            }
+            .addOnFailureListener { Log.e("Firestore", "Error fetching emotion history", it) }
     }
 }
