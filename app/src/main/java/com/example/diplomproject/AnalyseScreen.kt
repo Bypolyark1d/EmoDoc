@@ -115,7 +115,7 @@ fun AnalizeScreen(navController: NavController, onMenuClick: () -> Unit) {
                     ) {
                         Box(modifier = Modifier.fillMaxSize()) {
                             Image(
-                                painter = painterResource(id = R.drawable.card_profile),
+                                painter = painterResource(id = R.drawable.card4),
                                 contentDescription = "Эмоциональное состояние",
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier.fillMaxSize()
@@ -124,7 +124,7 @@ fun AnalizeScreen(navController: NavController, onMenuClick: () -> Unit) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .background(Color.Black.copy(alpha = 0.2f))
+                                    .background(Color.Black.copy(alpha = 0.3f))
                             )
 
                             Column(

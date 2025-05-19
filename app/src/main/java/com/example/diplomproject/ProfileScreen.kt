@@ -73,8 +73,6 @@ fun ProfileScreen(onMenuClick: () -> Unit, authViewModel: AuthViewModel = viewMo
 
     val currentEmotion = userProfile?.currentEmotion ?: -1
     val emotionName = getEmotionName(currentEmotion)
-    val emotionEmoji = getEmotionEmoji(emotionName)
-    val emotionDescription = getEmotionDescription(emotionName)
 
     Column(modifier = Modifier.fillMaxSize().background(backgroundColor)) {
         TopBar("Профиль", onMenuClick)

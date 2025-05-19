@@ -6,6 +6,7 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -26,9 +27,12 @@ sealed class Screens(val route: String) {
     object Login : Screens("login")
     object Analize : Screens("analize")
     object Profile : Screens("profile")
+    object BreathingSquare : Screens("breathing_square")
+    object Breathing478 : Screens("breathing_478")
     object Settings : Screens("settings")
     object EmotionAnalysis : Screens("emotion_analysis")
     object Survey : Screens("survey")
+    object Breathing : Screens("breathing")
     object Statistic : Screens("statistic")
     object Result : Screens("stress_result")
     object EmotionResult : Screens("emotion_result")
@@ -68,6 +72,20 @@ fun AppNavigation() {
             composable(Screens.Profile.route) { ProfileScreen(onMenuClick) }
             composable(Screens.Analize.route) { AnalizeScreen(navController, onMenuClick) }
             composable(Screens.Settings.route) { SettingsScreen(onMenuClick) }
+            composable(Screens.Breathing.route) {
+                BreathingScreen(
+                    onMenuClick = onMenuClick,
+                    onPracticeClick = { practiceRoute ->
+                        navController.navigate(practiceRoute)
+                    }
+                )
+            }
+            composable(Screens.BreathingSquare.route) {
+                BreathingSquareScreen(onMenuClick, navController, LocalContext.current)
+            }
+            composable(Screens.Breathing478.route) {
+                Breathing478Screen(onMenuClick,navController, LocalContext.current)
+            }
             composable(Screens.EmotionAnalysis.route) { EmotionAnalysisScreen(navController,emotionResultViewModel) }
             composable(Screens.Survey.route) { SurveyScreen(navController,stressSurveyViewModel) }
             composable(Screens.Result.route){ResultScreen(navController,stressSurveyViewModel,profileViewModel ) }

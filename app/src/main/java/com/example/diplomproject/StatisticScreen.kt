@@ -1,6 +1,7 @@
 package com.example.diplomproject
 
 import android.util.Log
+import android.view.ViewGroup
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateDpAsState
@@ -20,6 +21,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -61,6 +63,7 @@ import com.example.diplomproject.ViewModel.StatisticViewModel
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.font.FontFamily
@@ -70,10 +73,16 @@ import com.example.diplomproject.TextPreProccesor.getEmotionImageAndColor
 import com.example.diplomproject.TextPreProccesor.getEmotionName
 import com.example.diplomproject.data.EmotionEntry
 import com.example.diplomproject.data.StressSurveyResult
+import com.github.mikephil.charting.animation.Easing
 import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.data.PieData
+import com.github.mikephil.charting.data.PieDataSet
+import com.github.mikephil.charting.data.PieEntry
+import com.github.mikephil.charting.formatter.PercentFormatter
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -107,7 +116,7 @@ fun StatisticScreen(navController: NavController) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 16.dp),
+                .padding(bottom = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = { navController.popBackStack() }) {
@@ -118,7 +127,6 @@ fun StatisticScreen(navController: NavController) {
                 )
             }
         }
-
         TabRow(
             selectedTabIndex = pagerState.currentPage,
             containerColor = Color(0xFFffece0),
@@ -138,29 +146,26 @@ fun StatisticScreen(navController: NavController) {
                             pagerState.animateScrollToPage(index)
                         }
                     },
-                    selectedContentColor = Color(0xFF2A3439),
-                    unselectedContentColor = Color(0xFF2A3439).copy(alpha = 0.6f)
+                    selectedContentColor = Color(0xFFed9a66),
+                    unselectedContentColor = Color(0xFF2A3439)
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(8.dp)
                     ) {
-                        // Иконка в зависимости от индекса
                         val icon = if (index == 0) statisticsIcon else historyIcon
                         Image(
                             painter = icon,
                             contentDescription = null,
-                            modifier = Modifier.size(20.dp) // Размер иконки
+                            modifier = Modifier.size(24.dp),
+                            colorFilter = ColorFilter.tint(if (pagerState.currentPage == index) Color(0xFFed9a66) else Color(0xFF2A3439))
                         )
-
                         Spacer(modifier = Modifier.width(6.dp))
-
-                        // Текст заголовка
                         Text(
                             text = title,
-                            fontSize = 18.sp, // Увеличен размер текста
+                            fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
-                            color = if (pagerState.currentPage == index) Color(0xFF2A3439) else Color(0xFF2A3439).copy(alpha = 0.6f)
+                            color = if (pagerState.currentPage == index) Color(0xFFed9a66) else Color(0xFF2A3439)
                         )
                     }
                 }
@@ -172,18 +177,22 @@ fun StatisticScreen(navController: NavController) {
             modifier = Modifier.weight(1f)
         ) { page ->
             when (page) {
-                0 -> StatisticTab(stressSurveyResults)
+                0 -> StatisticTab(stressSurveyResults, emotionEntries)
                 1 -> HistoryTab(stressSurveyResults, emotionEntries)
             }
         }
     }
 }
 
+
 @Composable
-fun StatisticTab(stressSurveyResults: List<StressSurveyResult>) {
+fun StatisticTab(
+    stressSurveyResults: List<StressSurveyResult>,
+    emotionEntries: List<EmotionEntry>
+) {
     var isCardVisible by remember { mutableStateOf(false) }
 
-    LaunchedEffect(stressSurveyResults) {
+    LaunchedEffect(stressSurveyResults, emotionEntries) {
         isCardVisible = true
     }
 
@@ -204,19 +213,123 @@ fun StatisticTab(stressSurveyResults: List<StressSurveyResult>) {
                 animationSpec = tween(durationMillis = 1000)
             ),
         ) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFffece0)),
-                shape = RoundedCornerShape(16.dp),
-                elevation = CardDefaults.cardElevation(6.dp)
-            ) {
-                StressLevelGraph(stressSurveyResults)
+            Column {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFffece0)),
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = CardDefaults.cardElevation(6.dp)
+                ) {
+                    StressLevelGraph(stressSurveyResults)
+                }
+
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFffece0)),
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = CardDefaults.cardElevation(6.dp)
+                ) {
+                    Column {
+                        Text(
+                            text = "Общее распределение эмоций",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF2A3439),
+                            modifier = Modifier.padding(16.dp)
+                        )
+                        EmotionDistributionChart(emotionEntries)
+                    }
+                }
             }
         }
     }
 }
+@Composable
+fun EmotionDistributionChart(emotionEntries: List<EmotionEntry>) {
+    val emotionCount = emotionEntries.groupingBy { it.emotion }.eachCount()
+    val totalCount = emotionCount.values.sum().toFloat()
+    val entries = emotionCount.map { (emotion, count) ->
+        PieEntry(count.toFloat(), getEmotionName(emotion))
+    }
+    val gradientColors = listOf(
+        android.graphics.Color.parseColor("#5DADE2"),
+        android.graphics.Color.parseColor("#F7DC6F"),
+        android.graphics.Color.parseColor("#EC7063"),
+        android.graphics.Color.parseColor("#D35400"),
+        android.graphics.Color.parseColor("#95A5A6"),
+        android.graphics.Color.parseColor("#AF7AC5")
+    )
 
+    val emotionColorMap = emotionCount.keys.zip(gradientColors).toMap()
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .background(Color(0xFFffece0), RoundedCornerShape(16.dp))
+    ) {
+        AndroidView(
+            factory = { context ->
+                PieChart(context).apply {
+                    layoutParams = ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                    )
+                    description.isEnabled = false
+                    setUsePercentValues(false)
+                    legend.isEnabled = false
+                    setEntryLabelColor(android.graphics.Color.TRANSPARENT)
+                    setHoleColor(android.graphics.Color.TRANSPARENT)
+                    holeRadius = 60f
+                    transparentCircleRadius = 65f
+                    setCenterTextColor(android.graphics.Color.BLACK)
+                    animateY(1000, Easing.EaseInOutQuad)
+                }
+            },
+            update = { chart ->
+                val dataSet = PieDataSet(entries, "")
+                dataSet.colors = gradientColors
+                dataSet.sliceSpace = 2f
+                dataSet.valueTextColor = android.graphics.Color.TRANSPARENT
+                dataSet.valueTextSize = 0f
+                dataSet.setDrawValues(false)
+                val data = PieData(dataSet)
+                chart.data = data
+                chart.invalidate()
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(300.dp)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+        Column(modifier = Modifier.padding(8.dp)) {
+            emotionColorMap.forEach { (emotion, color) ->
+                val percentage = (emotionCount[emotion]?.toFloat() ?: 0f) / totalCount * 100
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(vertical = 4.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(16.dp)
+                            .background(Color(color), RoundedCornerShape(4.dp))
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "${getEmotionName(emotion)} — ${"%.1f".format(percentage)}%",
+                        color = Color(0xFF2A3439),
+                        fontSize = 14.sp
+                    )
+                }
+            }
+        }
+    }
+}
 @Composable
 fun HistoryTab(
     stressSurveyResults: List<StressSurveyResult>,
@@ -260,13 +373,6 @@ fun HistoryItemEmotion(entry: EmotionEntry) {
     val date = dateFormat.format(Date(entry.timestamp))
     val (emotionIcon, emotionColor) = getEmotionImageAndColor(entry.emotion)
     var isExpanded by remember { mutableStateOf(false) }
-    val transition = updateTransition(targetState = isExpanded, label = "")
-    val animatedHeight by transition.animateDp(label = "") {
-        if (it) 100.dp else 0.dp
-    }
-    val alpha by transition.animateFloat(label = "") {
-        if (it) 1f else 0f
-    }
 
     Card(
         modifier = Modifier
@@ -301,7 +407,7 @@ fun HistoryItemEmotion(entry: EmotionEntry) {
                     Image(
                         painter = emotionIcon,
                         contentDescription = null,
-                        modifier = Modifier.size(130.dp)
+                        modifier = Modifier.size(90.dp)
                     )
 
                     Spacer(modifier = Modifier.width(8.dp))
@@ -310,24 +416,38 @@ fun HistoryItemEmotion(entry: EmotionEntry) {
                         text = getEmotionName(entry.emotion),
                         fontWeight = FontWeight.Bold,
                         color = emotionColor,
-                        fontSize = 18.sp
+                        fontSize = 18.sp,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Image(
+                        painter = painterResource(
+                            id = if (isExpanded) R.drawable.arrow_up else R.drawable.arrow_down
+                        ),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .alpha(0.6f)
                     )
                 }
 
                 Spacer(modifier = Modifier.height(4.dp))
-
-                Box(
-                    modifier = Modifier
-                        .height(animatedHeight)
-                        .alpha(alpha)
-                ) {
-                    Text(
-                        text = entry.text,
-                        color = Color(0xFF2A3439),
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(start = 4.dp)
-                    )
+                AnimatedVisibility(visible = isExpanded) {
+                    Row {
+                        Box(
+                            modifier = Modifier
+                                .width(4.dp)
+                                .fillMaxHeight()
+                                .background(Color(0xFFed9a66))
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = entry.text,
+                            color = Color(0xFF2A3439),
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.padding(vertical = 4.dp)
+                        )
+                    }
                 }
             }
         }

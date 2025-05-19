@@ -86,6 +86,10 @@ fun DrawerContent(navController: NavHostController, authViewModel: AuthViewModel
                 navController.navigate(Screens.Analize.route)
                 onClose()
             }
+            DrawerItem("Дыхательные практики", R.drawable.ic_lotos) {
+                navController.navigate(Screens.Breathing.route)
+                onClose()
+            }
             DrawerItem("Настройки", R.drawable.ic_settings) {
                 navController.navigate(Screens.Settings.route)
                 onClose()
