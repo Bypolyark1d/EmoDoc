@@ -1,6 +1,8 @@
 package com.example.diplomproject
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.rememberDrawerState
@@ -17,6 +19,8 @@ import androidx.navigation.navArgument
 import com.example.diplomproject.ViewModel.AuthViewModel
 import com.example.diplomproject.ViewModel.EmotionResultViewModel
 import com.example.diplomproject.ViewModel.ProfileViewModel
+import com.example.diplomproject.ViewModel.RemindersViewModel
+import com.example.diplomproject.ViewModel.RemindersViewModelFactory
 import com.example.diplomproject.ViewModel.StressSurveyViewModel
 import kotlinx.coroutines.launch
 import java.net.URLDecoder
@@ -38,11 +42,16 @@ sealed class Screens(val route: String) {
     object EmotionResult : Screens("emotion_result")
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val remindersViewModel: RemindersViewModel = viewModel(
+        factory = RemindersViewModelFactory(context)
+    )
     val stressSurveyViewModel: StressSurveyViewModel = viewModel()
     val authViewModel: AuthViewModel = viewModel()
     val emotionResultViewModel: EmotionResultViewModel = viewModel()
@@ -71,7 +80,7 @@ fun AppNavigation() {
             composable(Screens.Login.route) { LoginScreen(navController, authViewModel) }
             composable(Screens.Profile.route) { ProfileScreen(onMenuClick) }
             composable(Screens.Analize.route) { AnalizeScreen(navController, onMenuClick) }
-            composable(Screens.Settings.route) { SettingsScreen(onMenuClick) }
+            composable(Screens.Settings.route) { RemindersScreen(onMenuClick,remindersViewModel) }
             composable(Screens.Breathing.route) {
                 BreathingScreen(
                     onMenuClick = onMenuClick,

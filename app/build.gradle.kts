@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.gms.google-services")
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.0.21"
 }
 
 android {
@@ -14,7 +15,7 @@ android {
         minSdk = 25
         targetSdk = 35
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.38"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -40,6 +41,10 @@ android {
     }
 }
 dependencies {
+    implementation ("androidx.compose.material:material-icons-extended:1.4.3")
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
     implementation ("androidx.compose.runtime:runtime-livedata:1.5.4")
     implementation ("com.google.code.gson:gson:2.8.8")

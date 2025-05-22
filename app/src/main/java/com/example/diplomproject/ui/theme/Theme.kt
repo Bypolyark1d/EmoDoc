@@ -12,13 +12,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
-private val PrimaryColor = Color(0xFF1A212F) // Темно-синий (основной)
-private val SecondaryColor = Color(0xFF5F88A4) // Пастельно-голубой (второстепенный)
-private val TertiaryColor = Color(0xFFB6CCFE) // Светло-голубой оттенок (дополнительный)
-private val BackgroundColor = Color(0xFFFFFFFF) // Белый фон
-private val SurfaceColor = Color(0xFFF8F9FF) // Светло-голубая поверхность
-private val TextOnPrimary = Color(0xFFFFFFFF) // Белый текст на темно-синем фоне
-private val TextOnBackground = Color(0xFF1A1A2E) // Темно-синий текст на белом фоне
+private val PrimaryColor = Color(0xFF1A212F)
+private val SecondaryColor = Color(0xFF5F88A4)
+private val TertiaryColor = Color(0xFFB6CCFE)
+private val BackgroundColor = Color(0xFFFFFFFF)
+private val SurfaceColor = Color(0xFFF8F9FF)
+private val TextOnPrimary = Color(0xFFFFFFFF)
+private val TextOnBackground = Color(0xFF1A1A2E)
 
 private val DarkColorScheme = darkColorScheme(
     primary = PrimaryColor,

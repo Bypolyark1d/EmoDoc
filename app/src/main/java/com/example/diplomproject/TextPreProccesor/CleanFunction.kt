@@ -87,12 +87,12 @@ fun getEmotionIndex(name: String): Int {
 @Composable
 fun getEmotionImageAndColor(emotion: Int): Pair<Painter, Color> {
     return when (emotion) {
-        0 -> painterResource(id = R.drawable.sad) to Color(0xFF3498DB) // Грусть
-        1 -> painterResource(id = R.drawable.joy) to Color(0xFFF1C40F) // Радость
-        2 -> painterResource(id = R.drawable.love) to Color(0xFFE74C3C) // Любовь
-        3 -> painterResource(id = R.drawable.angry) to Color(0xFFC0392B) // Злость
-        4 -> painterResource(id = R.drawable.fear) to Color(0xFF7F8C8D) // Страх
-        5 -> painterResource(id = R.drawable.surprise) to Color(0xFF9B59B6) // Удивление
-        else -> painterResource(id = R.drawable.neutral) to Color(0xFF95A5A6) // Нейтральный
+        0 -> painterResource(id = R.drawable.sad) to Color(0xFF83B2D2)   // Грусть
+        1 -> painterResource(id = R.drawable.joy) to Color(0xFFFFCE00)   // Радость
+        2 -> painterResource(id = R.drawable.love) to Color(0xFFFFB5B5)  // Любовь
+        3 -> painterResource(id = R.drawable.angry) to Color(0xFFFB5757) // Гнев
+        4 -> painterResource(id = R.drawable.fear) to Color(0xFF007960)  // Страх
+        5 -> painterResource(id = R.drawable.surprise) to Color(0xFF51D8E7) // Удивление
+        else -> painterResource(id = R.drawable.neutral) to Color(0xFF95A5A6) // Нейтральный (оставил как было)
     }
 }

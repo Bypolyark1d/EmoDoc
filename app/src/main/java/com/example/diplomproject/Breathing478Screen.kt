@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -41,6 +42,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -48,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
 import androidx.navigation.NavHostController
+import com.google.common.math.Quantiles.scale
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 
@@ -63,7 +66,6 @@ fun Breathing478Screen(
     var phaseIndex by remember { mutableStateOf(0) }
 
     val phaseDurations = listOf(4000L, 7000L, 8000L)
-    val phaseNames = listOf("Вдох", "Задержка", "Выдох")
 
     val animatedProgress by animateFloatAsState(
         targetValue = if (totalCycles > 0) currentCycle / totalCycles.toFloat() else 0f,
@@ -101,10 +103,13 @@ fun Breathing478Screen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFffece0))
-            .padding(16.dp)
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(Color(0xFFffece0), Color(0xFFfbe3cf))
+                )
+            )
+            .padding(16.dp),
     ) {
-
         IconButton(
             onClick = {
                 navController.popBackStack()
@@ -155,14 +160,18 @@ fun Breathing478Screen(
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.size(250.dp)
+                ) {
+                    Breathing478Triangle(
+                        phaseIndex = phaseIndex,
+                        isRunning = isRunning,
+                        modifier = Modifier
+                            .size(250.dp)
+                    )
 
-                Breathing478Triangle(
-                    phaseIndex = phaseIndex,
-                    isRunning = isRunning,
-                    modifier = Modifier
-                        .size(250.dp)
-                        .align(Alignment.CenterHorizontally)
-                )
+                }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
@@ -243,7 +252,27 @@ fun Breathing478Triangle(
             )
         }
     }
+    val scale = remember { Animatable(1f) }
+    val alpha = remember { Animatable(1f) }
 
+    LaunchedEffect(phaseIndex, isRunning) {
+        if (isRunning) {
+            alpha.animateTo(1f, animationSpec = tween(300))
+            while (isRunning) {
+                scale.animateTo(
+                    targetValue = 1.15f,
+                    animationSpec = tween(800, easing = FastOutSlowInEasing)
+                )
+                scale.animateTo(
+                    targetValue = 1f,
+                    animationSpec = tween(800, easing = FastOutSlowInEasing)
+                )
+            }
+        } else {
+            scale.snapTo(1f)
+            alpha.snapTo(1f)
+        }
+    }
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
@@ -260,7 +289,6 @@ fun Breathing478Triangle(
                 Offset(0f, triangleHeight)
             )
 
-            // Рисуем базовый треугольник
             for (i in pathPoints.indices) {
                 val start = pathPoints[i]
                 val end = pathPoints[(i + 1) % 3]
@@ -318,12 +346,18 @@ fun Breathing478Triangle(
                 )
             }
         }
-
         Text(
             text = if (isRunning) phaseNames[phaseIndex] else "Старт",
-            color = Color.Black,
             fontSize = 24.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(top = 70.dp)
+                .graphicsLayer {
+                    scaleX = scale.value
+                    scaleY = scale.value
+                }
+
         )
     }
 }

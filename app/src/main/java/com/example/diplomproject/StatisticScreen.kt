@@ -64,10 +64,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.viewinterop.AndroidView
 import com.example.diplomproject.TextPreProccesor.getEmotionImageAndColor
 import com.example.diplomproject.TextPreProccesor.getEmotionName
@@ -82,7 +79,6 @@ import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
-import com.github.mikephil.charting.formatter.PercentFormatter
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -253,78 +249,112 @@ fun EmotionDistributionChart(emotionEntries: List<EmotionEntry>) {
     val emotionCount = emotionEntries.groupingBy { it.emotion }.eachCount()
     val totalCount = emotionCount.values.sum().toFloat()
     val entries = emotionCount.map { (emotion, count) ->
-        PieEntry(count.toFloat(), getEmotionName(emotion))
+        PieEntry(count.toFloat(), "")
     }
-    val gradientColors = listOf(
-        android.graphics.Color.parseColor("#5DADE2"),
-        android.graphics.Color.parseColor("#F7DC6F"),
-        android.graphics.Color.parseColor("#EC7063"),
-        android.graphics.Color.parseColor("#D35400"),
-        android.graphics.Color.parseColor("#95A5A6"),
-        android.graphics.Color.parseColor("#AF7AC5")
-    )
 
-    val emotionColorMap = emotionCount.keys.zip(gradientColors).toMap()
+    val baseColors = listOf(
+        Color(0xFF83B2D2),  
+        Color(0xFFFFCE00),
+        Color(0xFFFFB5B5),
+        Color(0xFFFB5757),
+        Color(0xFF007960),
+        Color(0xFF51D8E7),
+    )
+    val emotionColors = emotionCount.keys.mapIndexed { index, emotion ->
+        val base = baseColors[index % baseColors.size]
+        val adjusted = base.copy(alpha = 0.85f)
+        emotion to adjusted
+    }.toMap()
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
             .background(Color(0xFFffece0), RoundedCornerShape(16.dp))
+            .padding(16.dp)
     ) {
-        AndroidView(
-            factory = { context ->
-                PieChart(context).apply {
-                    layoutParams = ViewGroup.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT
-                    )
-                    description.isEnabled = false
-                    setUsePercentValues(false)
-                    legend.isEnabled = false
-                    setEntryLabelColor(android.graphics.Color.TRANSPARENT)
-                    setHoleColor(android.graphics.Color.TRANSPARENT)
-                    holeRadius = 60f
-                    transparentCircleRadius = 65f
-                    setCenterTextColor(android.graphics.Color.BLACK)
-                    animateY(1000, Easing.EaseInOutQuad)
-                }
-            },
-            update = { chart ->
-                val dataSet = PieDataSet(entries, "")
-                dataSet.colors = gradientColors
-                dataSet.sliceSpace = 2f
-                dataSet.valueTextColor = android.graphics.Color.TRANSPARENT
-                dataSet.valueTextSize = 0f
-                dataSet.setDrawValues(false)
-                val data = PieData(dataSet)
-                chart.data = data
-                chart.invalidate()
-            },
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(300.dp)
-        )
+        ) {
+            AndroidView(
+                factory = { context ->
+                    PieChart(context).apply {
+                        layoutParams = ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT
+                        )
+                        description.isEnabled = false
+                        setUsePercentValues(true)
+                        legend.isEnabled = false
+                        setEntryLabelColor(android.graphics.Color.TRANSPARENT)
+                        setHoleColor(android.graphics.Color.TRANSPARENT)
+                        holeRadius = 60f
+                        transparentCircleRadius = 65f
+                        setCenterTextSize(18f)
+                        setCenterTextColor(android.graphics.Color.DKGRAY)
+                        setCenterText("Эмоции")
+                        animateY(1200, Easing.EaseInOutQuad)
+                    }
+                },
+                update = { chart ->
+                    val dataSet = PieDataSet(entries, "")
+                    dataSet.colors = emotionColors.values.map { it.toArgb() }
+                    dataSet.sliceSpace = 4f
+                    dataSet.valueTextColor = android.graphics.Color.TRANSPARENT
+                    dataSet.valueTextSize = 0f
+                    dataSet.setDrawValues(false)
 
-        Spacer(modifier = Modifier.height(16.dp))
-        Column(modifier = Modifier.padding(8.dp)) {
-            emotionColorMap.forEach { (emotion, color) ->
-                val percentage = (emotionCount[emotion]?.toFloat() ?: 0f) / totalCount * 100
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(vertical = 4.dp)
+                    val data = PieData(dataSet)
+                    chart.data = data
+                    chart.invalidate()
+                },
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            emotionCount.forEach { (emotion, count) ->
+                val percentage = (count.toFloat() / totalCount) * 100
+                val color = emotionColors[emotion] ?: Color.Gray
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFffece0))
                 ) {
-                    Box(
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
-                            .size(16.dp)
-                            .background(Color(color), RoundedCornerShape(4.dp))
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "${getEmotionName(emotion)} — ${"%.1f".format(percentage)}%",
-                        color = Color(0xFF2A3439),
-                        fontSize = 14.sp
-                    )
+                            .padding(horizontal = 16.dp, vertical = 10.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(22.dp)
+                                .background(color, RoundedCornerShape(6.dp))
+                        )
+                        Spacer(modifier = Modifier.width(14.dp))
+                        Text(
+                            text = getEmotionName(emotion),
+                            color = Color(0xFF2A3439),
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 16.sp,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Text(
+                            text = "${"%.1f".format(percentage)}%",
+                            color = Color(0xFF707070),
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 15.sp
+                        )
+                    }
                 }
             }
         }
@@ -385,7 +415,7 @@ fun HistoryItemEmotion(entry: EmotionEntry) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(emotionColor)
+                    .background(emotionColor.copy(alpha = 0.8f))
                     .padding(6.dp)
             ) {
                 Text(
@@ -415,7 +445,7 @@ fun HistoryItemEmotion(entry: EmotionEntry) {
                     Text(
                         text = getEmotionName(entry.emotion),
                         fontWeight = FontWeight.Bold,
-                        color = emotionColor,
+                        color = Color(0xFF2A3439),
                         fontSize = 18.sp,
                         modifier = Modifier.weight(1f)
                     )
@@ -426,7 +456,8 @@ fun HistoryItemEmotion(entry: EmotionEntry) {
                         contentDescription = null,
                         modifier = Modifier
                             .size(24.dp)
-                            .alpha(0.6f)
+                            .alpha(0.6f),
+                        colorFilter = ColorFilter.tint(Color(0xFF2A3439))
                     )
                 }
 
@@ -460,8 +491,8 @@ fun HistoryItemStress(result: StressSurveyResult) {
 
     val stressColor = when {
         result.stressLevel < 3 -> Color(0xFF76D7B2)
-        result.stressLevel < 6 -> Color(0xFFF4D03F)
-        else -> Color(0xFFFF5733)
+        result.stressLevel < 6 -> Color(0xFFDCD36A)
+        else -> Color(0xFFE66761)
     }
 
     Card(
@@ -475,7 +506,7 @@ fun HistoryItemStress(result: StressSurveyResult) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(stressColor)
+                    .background(stressColor.copy(alpha = 0.8f))
                     .padding(6.dp)
             ) {
                 Text(
@@ -500,13 +531,8 @@ fun HistoryItemStress(result: StressSurveyResult) {
                         Text(
                             text = "Уровень стресса:",
                             fontWeight = FontWeight.Bold,
-                            color = stressColor,
+                            color = Color(0xFF2A3439),
                             fontSize = 18.sp
-                        )
-                        Text(
-                            text = "${result.stressLevel} / 10",
-                            color = stressColor,
-                            fontSize = 16.sp
                         )
                     }
 

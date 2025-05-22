@@ -4,7 +4,6 @@ import android.content.Context
 import android.media.MediaPlayer
 
 class AudioPlayer(private val context: Context, private val resId: Int) {
-
     private var mediaPlayer: MediaPlayer? = null
 
     init {
@@ -14,7 +13,6 @@ class AudioPlayer(private val context: Context, private val resId: Int) {
         } catch (e: Exception) {
         }
     }
-
     fun start() {
         try {
             if (mediaPlayer?.isPlaying == false) {
@@ -23,7 +21,6 @@ class AudioPlayer(private val context: Context, private val resId: Int) {
         } catch (e: Exception) {
         }
     }
-
     fun pause() {
         try {
             if (mediaPlayer?.isPlaying == true) {
@@ -32,7 +29,6 @@ class AudioPlayer(private val context: Context, private val resId: Int) {
         } catch (e: Exception) {
         }
     }
-
     fun stop() {
         try {
             mediaPlayer?.stop()
@@ -41,14 +37,12 @@ class AudioPlayer(private val context: Context, private val resId: Int) {
         } catch (e: Exception) {
         }
     }
-
     fun reset() {
         try {
             mediaPlayer?.seekTo(0)
         } catch (e: Exception) {
         }
     }
-
     fun isPlaying(): Boolean {
         return mediaPlayer?.isPlaying == true
     }

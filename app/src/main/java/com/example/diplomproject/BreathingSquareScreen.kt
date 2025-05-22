@@ -39,6 +39,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -241,7 +242,27 @@ fun BreathingSquare(
             )
         }
     }
+    val scale = remember { Animatable(1f) }
+    val alpha = remember { Animatable(1f) }
 
+    LaunchedEffect(phaseIndex, isRunning) {
+        if (isRunning) {
+            alpha.animateTo(1f, animationSpec = tween(300))
+            while (isRunning) {
+                scale.animateTo(
+                    targetValue = 1.15f,
+                    animationSpec = tween(800, easing = FastOutSlowInEasing)
+                )
+                scale.animateTo(
+                    targetValue = 1f,
+                    animationSpec = tween(800, easing = FastOutSlowInEasing)
+                )
+            }
+        } else {
+            scale.snapTo(1f)
+            alpha.snapTo(1f)
+        }
+    }
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
@@ -259,7 +280,6 @@ fun BreathingSquare(
                 Offset(baseStrokeWidth / 2, baseStrokeWidth / 2 + sideLength)
             )
 
-            // Рисуем базовый квадрат
             for (i in 0..3) {
                 val start = pathPoints[i]
                 val end = pathPoints[(i + 1) % 4]
@@ -321,9 +341,15 @@ fun BreathingSquare(
 
         Text(
             text = if (isRunning) phaseNames[phaseIndex] else "Старт",
-            color = Color.Black,
             fontSize = 24.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+                .align(Alignment.Center)
+                .graphicsLayer {
+                    scaleX = scale.value
+                    scaleY = scale.value
+                }
+
         )
     }
 }

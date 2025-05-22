@@ -69,14 +69,14 @@ fun DrawerContent(navController: NavHostController, authViewModel: AuthViewModel
                 ) {
                     Spacer(modifier = Modifier.width(12.dp))
                     Column {
-                        Text(it.displayName ?: "Без имени", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                        Text(it.email ?: "Без почты", color = Color.White, fontSize = 14.sp)
+                        Text(it.displayName ?: "Без имени", color = Color(0xFFffece0), fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                        Text(it.email ?: "Без почты", color = Color(0xFFffece0), fontSize = 14.sp)
                     }
                 }
-            } ?: Text("Неавторизованный пользователь", color = Color.White)
+            } ?: Text("Неавторизованный пользователь", color = Color(0xFFffece0))
 
             Spacer(modifier = Modifier.height(24.dp))
-            Divider(color = Color.White.copy(alpha = 0.4f), thickness = 1.dp)
+            Divider(color = Color(0xFFffece0).copy(alpha = 0.4f), thickness = 1.dp)
 
             DrawerItem("Профиль", R.drawable.ic_profile) {
                 navController.navigate(Screens.Profile.route)
@@ -90,7 +90,7 @@ fun DrawerContent(navController: NavHostController, authViewModel: AuthViewModel
                 navController.navigate(Screens.Breathing.route)
                 onClose()
             }
-            DrawerItem("Настройки", R.drawable.ic_settings) {
+            DrawerItem("Напоминания", R.drawable.ic_notification) {
                 navController.navigate(Screens.Settings.route)
                 onClose()
             }

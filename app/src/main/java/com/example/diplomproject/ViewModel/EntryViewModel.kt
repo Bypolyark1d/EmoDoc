@@ -35,7 +35,7 @@ class EntryViewModel : ViewModel() {
         )
         db.collection("users")
             .document(userId)
-            .collection("surveys")  // вложенная коллекция
+            .collection("surveys")
             .add(result)
             .addOnSuccessListener { Log.d("Firestore", "Survey saved") }
             .addOnFailureListener { Log.e("Firestore", "Error saving survey", it) }

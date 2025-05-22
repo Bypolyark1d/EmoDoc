@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -68,7 +69,13 @@ fun AnalizeScreen(navController: NavController, onMenuClick: () -> Unit) {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .background(Color.Black.copy(alpha = 0.2f))
+                                .background(
+                                    Brush.verticalGradient(
+                                        colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.6f)),
+                                        startY = 0f,
+                                        endY = Float.POSITIVE_INFINITY
+                                    )
+                                )
                         )
 
                         Column(
@@ -81,13 +88,13 @@ fun AnalizeScreen(navController: NavController, onMenuClick: () -> Unit) {
                             Text(
                                 text = "Статистика Анализов",
                                 fontSize = 22.sp,
-                                color = Color.White,
+                                color = Color(0xFFffece0),
                                 fontWeight = FontWeight.Bold
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
                                 text = "Просматривайте историю анализов.",
-                                color = Color.White,
+                                color = Color(0xFFffece0),
                                 fontSize = 16.sp
                             )
                         }
@@ -124,7 +131,13 @@ fun AnalizeScreen(navController: NavController, onMenuClick: () -> Unit) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .background(Color.Black.copy(alpha = 0.3f))
+                                    .background(
+                                        Brush.verticalGradient(
+                                            colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.6f)),
+                                            startY = 0f,
+                                            endY = Float.POSITIVE_INFINITY
+                                        )
+                                    )
                             )
 
                             Column(
@@ -135,16 +148,16 @@ fun AnalizeScreen(navController: NavController, onMenuClick: () -> Unit) {
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Text(
-                                    text = "Анализ эмоционального состояния",
-                                    fontSize = 20.sp,
+                                    text = "Твой эмоциональный фон",
+                                    fontSize = 18.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color.White
+                                    color = Color(0xFFffece0)
                                 )
                                 Spacer(modifier = Modifier.height(12.dp))
                                 Text(
                                     text = "Анализируйте свое настроение с помощью ИИ.",
                                     fontSize = 16.sp,
-                                    color = Color.White
+                                    color = Color(0xFFffece0)
                                 )
                             }
                         }
@@ -168,7 +181,13 @@ fun AnalizeScreen(navController: NavController, onMenuClick: () -> Unit) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .background(Color.Black.copy(alpha = 0.2f))
+                                    .background(
+                                        Brush.verticalGradient(
+                                            colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.6f)),
+                                            startY = 0f,
+                                            endY = Float.POSITIVE_INFINITY
+                                        )
+                                    )
                             )
 
                             Column(
@@ -180,15 +199,15 @@ fun AnalizeScreen(navController: NavController, onMenuClick: () -> Unit) {
                             ) {
                                 Text(
                                     text = "Тестирование уровня стресса",
-                                    fontSize = 20.sp,
+                                    fontSize = 18.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color.White
+                                    color = Color(0xFFffece0)
                                 )
                                 Spacer(modifier = Modifier.height(12.dp))
                                 Text(
                                     text = "Узнайте свой текущий уровень стресса",
                                     fontSize = 16.sp,
-                                    color = Color.White
+                                    color = Color(0xFFffece0)
                                 )
                             }
                         }

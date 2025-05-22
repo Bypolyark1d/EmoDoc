@@ -142,7 +142,7 @@ fun SurveyScreen(navController: NavController, viewModel: StressSurveyViewModel 
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(300.dp)
+                        .height(250.dp)
                         .padding(vertical = 16.dp)
                         .shadow(10.dp, RoundedCornerShape(16.dp))
                         .clip(RoundedCornerShape(16.dp)),
@@ -159,30 +159,29 @@ fun SurveyScreen(navController: NavController, viewModel: StressSurveyViewModel 
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .background(Color.Black.copy(alpha = 0.2f))
+                                .background(
+                                    Brush.verticalGradient(
+                                        colors = listOf(Color.Black.copy(alpha = 0.6f), Color.Black.copy(alpha = 0.2f))
+                                    )
+                                )
                         )
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(16.dp),
-                            verticalArrangement = Arrangement.SpaceBetween
+                                .padding(horizontal = 24.dp),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.Start
                         ) {
-                            Spacer(modifier = Modifier.weight(1f))
-                            Column {
-                                Text(
-                                    text = "Описание теста",
-                                    fontSize = 22.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.White,
-                                    modifier = Modifier.padding(bottom = 8.dp)
-                                )
-                                Text(
-                                    text = "Этот тест поможет вам определить уровень стресса. Ответьте на несколько вопросов, чтобы мы могли оценить вашу ситуацию.",
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.White
-                                )
-                            }
+                            Text(
+                                text = "Давайте немного поговорим о вашем самочувствии.\n" +
+                                        "Пройдите небольшой тест, чтобы мы могли оценить уровень стресса и дать полезные советы, которые подойдут именно вам.",
+                                fontSize = 18.sp,
+                                color = Color(0xFFffece0),
+                                fontWeight = FontWeight.Medium,
+                                lineHeight = 28.sp,
+                                textAlign = TextAlign.Start,
+                                modifier = Modifier.fillMaxWidth()
+                            )
                         }
                     }
                 }
@@ -216,28 +215,46 @@ fun SurveyCard(title: String, iconRes: Int, onClick: () -> Unit) {
             .shadow(10.dp),
         elevation = CardDefaults.cardElevation(6.dp),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF4E756E))
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
-        Row(
+        Box(
             modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+                .fillMaxWidth()
+                .height(120.dp)
+                .clip(RoundedCornerShape(12.dp))
         ) {
-            androidx.compose.material3.Icon(
-                painter = painterResource(id = iconRes),
-                contentDescription = title,
-                tint = Color.White,
-                modifier = Modifier.size(80.dp)
+            Image(
+                painter = painterResource(id = R.drawable.background_el),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.matchParentSize()
             )
-            Spacer(modifier = Modifier.width(16.dp))
-            Text(
-                text = title,
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-                modifier = Modifier.weight(1f)
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(Color.Black.copy(alpha = 0.4f))
             )
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                androidx.compose.material3.Icon(
+                    painter = painterResource(id = iconRes),
+                    contentDescription = title,
+                    tint = Color(0xFFffece0),
+                    modifier = Modifier.size(80.dp)
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                Text(
+                    text = title,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFFffece0),
+                    modifier = Modifier.weight(1f)
+                )
+            }
         }
     }
 }
@@ -250,12 +267,12 @@ fun StressTestScreen(viewModel: StressSurveyViewModel, onComplete: (Float) -> Un
     var questionIndex by remember { mutableStateOf(0) }
     val context = LocalContext.current
     val questions = remember { getRandomQuestions(context) }
-    val textColor = Color(0xFF2A3439)
     val primaryColor = Color(0xFFed9a66)
     val scores = listOf(0, 1, 2, 3, 4)
 
     var userScores by remember { mutableStateOf(List(questions.size) { 0 }) }
     var stressLevel by remember { mutableStateOf(0f) }
+    var canClick by remember { mutableStateOf(true) }
 
     val coroutineScope = rememberCoroutineScope()
 
@@ -312,7 +329,7 @@ fun StressTestScreen(viewModel: StressSurveyViewModel, onComplete: (Float) -> Un
                             text = questions[targetIndex].first,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color.White,
+                            color = Color(0xFFffece0),
                             textAlign = TextAlign.Center
                         )
                     }
@@ -334,8 +351,10 @@ fun StressTestScreen(viewModel: StressSurveyViewModel, onComplete: (Float) -> Un
                         .padding(vertical = 8.dp)
                         .height(65.dp)
                         .graphicsLayer(scaleX = scale, scaleY = scale)
-                        .clickable {
+                        .clickable(enabled = canClick) {
+                            canClick = false
                             isClicked = true
+
                             val updatedScores = userScores.toMutableList()
                             updatedScores[questionIndex] = scores[index]
                             userScores = updatedScores
@@ -345,6 +364,7 @@ fun StressTestScreen(viewModel: StressSurveyViewModel, onComplete: (Float) -> Un
                                 isClicked = false
                                 if (questionIndex < questions.size - 1) {
                                     questionIndex++
+                                    canClick = true
                                 } else {
                                     val totalScore = userScores.sum()
                                     val normalizedLevel = (totalScore.toFloat() / (questions.size * 4)) * 10f
@@ -353,7 +373,7 @@ fun StressTestScreen(viewModel: StressSurveyViewModel, onComplete: (Float) -> Un
                                     val userId = "defaultUser"
                                     val result = StressSurveyResult(
                                         userId = userId,
-                                        stressLevel = stressAsInt.toFloat() // если в Firestore ожидается float
+                                        stressLevel = stressAsInt.toFloat()
                                     )
                                     viewModel.setStressResult(result)
                                     onComplete(stressAsInt.toFloat())
@@ -367,7 +387,7 @@ fun StressTestScreen(viewModel: StressSurveyViewModel, onComplete: (Float) -> Un
                         text = answer,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White,
+                        color = Color(0xFFffece0),
                         modifier = Modifier
                             .fillMaxSize()
                             .wrapContentSize(Alignment.Center)

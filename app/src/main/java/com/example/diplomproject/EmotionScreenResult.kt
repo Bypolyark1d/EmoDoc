@@ -83,9 +83,7 @@ fun EmotionResultScreen(navController: NavHostController,
     val emotionEntry = emotionEntryState.value
     val (emotionImage, backgroundColor) = getEmotionImageAndColor(emotionEntry?.emotion ?: -1)
     val emotionName = getEmotionName(emotionEntry?.emotion ?: -1)
-    val emotionEmoji = getEmotionEmoji(emotionName)
     val emotionDescription = getEmotionDescription(emotionName)
-
     if (emotionEntry == null) {
         Log.d("EmotionResultScreen", "EmotionEntry is null")
     } else {
@@ -201,19 +199,30 @@ fun EmotionResultScreen(navController: NavHostController,
             }
             if (bottomSheetState.isVisible) {
                 ModalBottomSheet(
-                    containerColor = Color(0xFF4E756E),
+                    containerColor = Color(0xFFed9a66),
                     sheetState = bottomSheetState,
                     onDismissRequest = {
-                        scope.launch {
-                            bottomSheetState.hide()
-                        }
+                        scope.launch { bottomSheetState.hide() }
+                    },
+                    tonalElevation = 16.dp,
+                    dragHandle = {
+                        Box(
+                            modifier = Modifier
+                                .padding(vertical = 8.dp)
+                                .width(40.dp)
+                                .height(4.dp)
+                                .background(
+                                    color = Color.White.copy(alpha = 0.6f),
+                                    shape = RoundedCornerShape(2.dp)
+                                )
+                        )
                     }
                 ) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp)
-                            .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                            .padding(horizontal = 24.dp, vertical = 16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
                             text = "Согласны ли вы с анализом?",
@@ -221,11 +230,14 @@ fun EmotionResultScreen(navController: NavHostController,
                             fontWeight = FontWeight.Bold,
                             color = Color.White,
                             modifier = Modifier.align(Alignment.CenterHorizontally)
+                                .padding(16.dp)
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
                         Row(
-                            horizontalArrangement = Arrangement.Center,
-                            modifier = Modifier.fillMaxWidth()
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 24.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             Button(
                                 onClick = {
@@ -234,17 +246,27 @@ fun EmotionResultScreen(navController: NavHostController,
                                         profileViewModel.updateCurrentEmotion(it.emotion)
                                         entryViewModel.saveEmotionEntry(it.text, it.emotion)
                                     }
-                                    navController.navigate("analize")
+                                    scope.launch {
+                                        bottomSheetState.hide()
+                                        navController.navigate("analize") {
+                                            popUpTo("emotion_analysis") { inclusive = true }
+                                        }
+                                    }
                                 },
-                                modifier = Modifier.padding(end = 50.dp)
-                                    .width(100.dp),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(48.dp),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(
-                                        0xFFed9a66
-                                    )
+                                    containerColor = Color(0xFF4E756E),
+                                    contentColor = Color.White
+                                ),
+                                shape = RoundedCornerShape(12.dp),
+                                elevation = ButtonDefaults.buttonElevation(
+                                    defaultElevation = 4.dp,
+                                    pressedElevation = 2.dp
                                 )
                             ) {
-                                Text(text = "Да", color = Color.White)
+                                Text("Да", fontWeight = FontWeight.SemiBold)
                             }
                             Button(
                                 onClick = {
@@ -253,19 +275,28 @@ fun EmotionResultScreen(navController: NavHostController,
                                         showDialog.value = true
                                     }
                                 },
-                                modifier = Modifier.width(100.dp),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(48.dp),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(
-                                        0xFFed9a66
-                                    )
+                                    containerColor = Color(0xFF2A3439),
+                                    contentColor = Color.White
+                                ),
+                                shape = RoundedCornerShape(12.dp),
+                                elevation = ButtonDefaults.buttonElevation(
+                                    defaultElevation = 4.dp,
+                                    pressedElevation = 2.dp
                                 )
-
                             ) {
-                                Text(text = "Нет", color = Color.White)
+                                Text("Нет", fontWeight = FontWeight.SemiBold)
                             }
                         }
+                        Text(
+                            text = "Вы можете выбрать более подходящуюю эмоцию",
+                            color = Color.White.copy(alpha = 0.7f),
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
                     }
-
                 }
             }
             if (showDialog.value) {
@@ -328,7 +359,7 @@ fun EmotionSelectionDialog(
                         Image(
                             painter = emotionPainter,
                             contentDescription = "Эмоция",
-                            colorFilter = ColorFilter.tint(emotionColor),  // <-- Вот тут окрашивание!
+                            colorFilter = ColorFilter.tint(emotionColor),
                             modifier = Modifier.size(100.dp)
                         )
                         Spacer(modifier = Modifier.height(8.dp))
@@ -394,18 +425,6 @@ fun EmotionSelectionDialog(
     )
 }
 
-fun getEmotionEmoji(emotion: String): String {
-    return when {
-        "Грусть" in emotion -> "😢"
-        "Радость" in emotion -> "😊"
-        "Любовь" in emotion -> "😍"
-        "Злость" in emotion -> "😡"
-        "Страх" in emotion -> "😨"
-        "Удивление" in emotion -> "😲"
-        else -> "🤔"
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
 fun EmotionResultScreenPreview() {
@@ -419,10 +438,10 @@ fun getEmotionDescription(emotion: String): String {
     return when {
         "Грусть" in emotion -> "Ты чувствуешь грусть. Попробуй отдохнуть и позаботься о себе"
         "Радость" in emotion -> "У тебя радостное настроение! Отличный момент, чтобы поделиться им с кем-то"
-        "Любовь" in emotion -> "Ты испытываешь любовь — пусть это чувство придаёт сил"
+        "Любовь" in emotion -> "Ты испытываешь любовь — пусть это чувство придаёт тебе сил"
         "Злость" in emotion -> "Похоже, ты злишься. Сделай паузу, попробуй подышать глубже"
         "Страх" in emotion -> "Ты испугался или обеспокоен. Вспомни, что тебе помогает чувствовать себя в безопасности"
-        "Удивление" in emotion -> "Что-то удивило тебя! Иногда перемены — это хорошо"
+        "Удивление" in emotion -> "Что-то удивило тебя, Иногда перемены — это хорошо"
         else -> "Эмоция не определена. Попробуй снова"
     }
 }
